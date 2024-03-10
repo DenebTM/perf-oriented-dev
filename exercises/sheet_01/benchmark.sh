@@ -1,9 +1,24 @@
 #!/usr/bin/env bash
 
+# make C-c kill the whole script
+quit() { exit 3; }
+trap quit SIGINT
+trap quit SIGTERM
+
+stats_columns=("wall" "user" "system" "mem")
+stats_units=("s" "s" "s" "kB")
+print_stat() {
+    local stat=($1)
+    for ((col=0; col<${#stat[@]}; col++)); do
+        >&2 echo -n "${stats_columns[col]} ${stat[col]}${stats_units[col]}  "
+    done
+    echo
+}
+
 # configure timing command
 time_cmd="/usr/bin/env time"
 time_output="/tmp/$$_envtime"
-time_args="-f %e -o $time_output -q"
+# wall time, user CPU time, system CPU time, resident set size
 
 # available command-line arguments
 arg_nruns=5
@@ -17,7 +32,7 @@ while [[ $# -gt 0 ]]; do
         -n|--nruns)
             shift
             arg_nruns=$1
-            
+
             # validate argument given for -n|--nruns
             case $arg_nruns in
                 ''|*[!0-9]*)
@@ -70,39 +85,40 @@ for run in $(seq 1 1 $arg_nruns); do
     >&2 echo "====================="
 
 if [[ $arg_quiet == true ]]; then
-    $time_cmd $time_args "$@" >/dev/null 2>&1
+    $time_cmd -f '%e %U %S %M' -o $time_output -q "$@" >/dev/null 2>&1
 else
-    >&2 $time_cmd $time_args "$@"
+    >&2 $time_cmd -f '%e %U %S %M' -o $time_output -q "$@"
     >&2 echo "---------------------"
 fi
-    
-    read runtime < "$time_output"
-    >&2 echo "Runtime: $runtime s"
-    
-    runtimes+=($runtime)
-    
+
+    read stat < "$time_output"
+    stats+=("$stat")
+
+    print_stat "${stat[*]}"
     >&2 echo
 done
 rm -f "$time_output"
 
-runtimes_count=${#runtimes[@]}
-runtimes_sum=$(IFS="+"; bc -l <<< "${runtimes[*]}")
-runtimes_mean=$(bc -l <<< "$runtimes_sum / $runtimes_count")
+# compute means per column as <sum of measurements> / <nruns>
+# keep 3 decimal places
+stats_means=($(printf '%s\n' "${stats[@]}" | \
+    awk '{e+=$1; u+=$2; s+=$3; m+=$4}
+        END{printf "%.3f %.3f %.3f %.3f", e/NR,u/NR,s/NR,m/NR}'))
 
-# compute variance as <sum of deviations from the mean> / <nruns>
-sos=0
-for runtime in "${runtimes[@]}"; do
-    sqdev=$(bc -l <<< "($runtime - $runtimes_mean)^2")
-    sos=$(bc -l <<< "$sos + $sqdev")
-done
-runtimes_variance=$(bc -l <<< "$sos / $runtimes_count")
+# compute variances as <sum of deviations from the mean> / <nruns>
+# keep 3 decimal places
+stats_variances=($(printf '%s\n' "${stats[@]}" \
+    | awk "{de=\$1 - ${stats_means[0]}; se+=de*de;
+            du=\$2 - ${stats_means[1]}; su+=du*du;
+            ds=\$3 - ${stats_means[2]}; ss+=ds*ds;
+            dm=\$4 - ${stats_means[3]}; sm+=dm*dm}
+        END{printf \"%.3f %.3f %.3f %.3f\",
+                   se/(NR-1),su/(NR-1),ss/(NR-1),sm/(NR-1)}"))
 
-# prettify results
-runtimes_mean=$(printf "%.3f" $runtimes_mean)
-runtimes_variance=$(printf "%.3f" $runtimes_variance)
-
->&2 echo "Mean:     $(printf "%7s" $runtimes_mean) s"
->&2 echo "Variance: $(printf "%7s" $runtimes_variance) s"
+>&2 echo "Means:"; >&2 echo -n "  "
+print_stat "${stats_means[*]}"
+>&2 echo "Variances:"; >&2 echo -n "  "
+print_stat "${stats_variances[*]}"
 >&2 echo
 
 # direct json output either to stdout or a specified file
@@ -118,23 +134,39 @@ fi
     echo -n "\"cmdline\":"
         quoted_cmdline=()
         for arg in "$@"; do
-            case "$arg" in
-                # TODO: fix literal quotes
-                *\ *)
-                    quoted_cmdline+=("\\\"$arg\\\"")
-                    ;;
-                *)
-                    quoted_cmdline+=("$arg")
-                    ;;
+            # escape literal quotes in argument
+            arg="$(sed 's/"/\\"/g' <<< "$arg")"
+            # quote argument if it contains spaces
+            case "$arg" in *\ *)
+                    arg="\\\"$arg\\\""
             esac
+            quoted_cmdline+=("$arg")
         done
         echo -n "\"${quoted_cmdline[@]}\","
     echo -n "\"quiet\":$arg_quiet,"
     echo -n "\"nruns\":$arg_nruns,"
+
     echo -n "\"runs\":["
-        echo -n $(IFS=","; echo "${runtimes[*]}")
+        runs_print=()
+        for stat in "${stats[@]}"; do
+            stat=($stat)
+            run_print=()
+            for ((col=0; col<${#stats_columns[@]}; col++)); do
+                run_print+=("\"${stats_columns[col]}\":${stat[col]}")
+            done
+            runs_print+=("{$(IFS=","; echo "${run_print[*]}")}")
+        done
+        echo -n $(IFS=","; echo "${runs_print[*]}")
     echo -n "],"
-    echo -n "\"mean\":$runtimes_mean,"
-    echo -n "\"variance\":$runtimes_variance"
-    echo "}"
+
+    means_print=()
+    variances_print=()
+    for ((col=0; col<${#stats_columns[@]}; col++)); do
+        means_print+=("\"${stats_columns[col]}\":${stats_means[col]}")
+        variances_print+=("\"${stats_columns[col]}\":${stats_variances[col]}")
+    done
+    echo -n "\"mean\":{$(IFS=","; echo "${means_print[*]}")},"
+    echo -n "\"variance\":{$(IFS=","; echo "${variances_print[*]}")}"
+
+    echo -n "}"
 ) >&3
