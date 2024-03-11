@@ -1,0 +1,49 @@
+{
+  "cmdline": "/home/deneb/Nextcloud/Documents/Uni/2024-ss/poc/perf-oriented-dev/small_samples/build/nbody",
+  "quiet": true,
+  "nruns": 5,
+  "runs": [
+    {
+      "wall": 1.69,
+      "user": 1.68,
+      "system": 0.00,
+      "mem": 1728
+    },
+    {
+      "wall": 1.64,
+      "user": 1.64,
+      "system": 0.00,
+      "mem": 1692
+    },
+    {
+      "wall": 1.67,
+      "user": 1.67,
+      "system": 0.00,
+      "mem": 1692
+    },
+    {
+      "wall": 1.61,
+      "user": 1.60,
+      "system": 0.00,
+      "mem": 1692
+    },
+    {
+      "wall": 1.64,
+      "user": 1.64,
+      "system": 0.00,
+      "mem": 1920
+    }
+  ],
+  "mean": {
+    "wall": 1.650,
+    "user": 1.646,
+    "system": 0.000,
+    "mem": 1744.800
+  },
+  "variance": {
+    "wall": 0.001,
+    "user": 0.001,
+    "system": 0.000,
+    "mem": 9835.200
+  }
+}

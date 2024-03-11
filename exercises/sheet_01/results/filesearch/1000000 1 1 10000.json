@@ -1,0 +1,49 @@
+{
+  "cmdline": "/home/deneb/Nextcloud/Documents/Uni/2024-ss/poc/perf-oriented-dev/small_samples/build/filesearch",
+  "quiet": true,
+  "nruns": 5,
+  "runs": [
+    {
+      "wall": 14.95,
+      "user": 1.65,
+      "system": 9.28,
+      "mem": 1152
+    },
+    {
+      "wall": 8.37,
+      "user": 1.59,
+      "system": 6.69,
+      "mem": 1300
+    },
+    {
+      "wall": 8.40,
+      "user": 1.61,
+      "system": 6.78,
+      "mem": 1508
+    },
+    {
+      "wall": 8.24,
+      "user": 1.58,
+      "system": 6.64,
+      "mem": 1316
+    },
+    {
+      "wall": 8.36,
+      "user": 1.61,
+      "system": 6.74,
+      "mem": 1316
+    }
+  ],
+  "mean": {
+    "wall": 9.664,
+    "user": 1.608,
+    "system": 7.226,
+    "mem": 1318.400
+  },
+  "variance": {
+    "wall": 8.736,
+    "user": 0.001,
+    "system": 1.321,
+    "mem": 15996.800
+  }
+}

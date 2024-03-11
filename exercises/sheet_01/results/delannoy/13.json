@@ -1,0 +1,49 @@
+{
+  "cmdline": "/home/deneb/Nextcloud/Documents/Uni/2024-ss/poc/perf-oriented-dev/small_samples/build/delannoy 13",
+  "quiet": true,
+  "nruns": 5,
+  "runs": [
+    {
+      "wall": 3.17,
+      "user": 3.17,
+      "system": 0.00,
+      "mem": 1316
+    },
+    {
+      "wall": 3.17,
+      "user": 3.16,
+      "system": 0.00,
+      "mem": 1312
+    },
+    {
+      "wall": 3.25,
+      "user": 3.24,
+      "system": 0.00,
+      "mem": 1152
+    },
+    {
+      "wall": 3.19,
+      "user": 3.19,
+      "system": 0.00,
+      "mem": 1152
+    },
+    {
+      "wall": 3.14,
+      "user": 3.13,
+      "system": 0.00,
+      "mem": 1316
+    }
+  ],
+  "mean": {
+    "wall": 3.184,
+    "user": 3.178,
+    "system": 0.000,
+    "mem": 1249.600
+  },
+  "variance": {
+    "wall": 0.002,
+    "user": 0.002,
+    "system": 0.000,
+    "mem": 7940.800
+  }
+}

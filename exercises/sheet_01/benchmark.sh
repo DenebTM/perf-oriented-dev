@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # make C-c kill the whole script
-quit() { exit 3; }
+quit() { exit 130; }
 trap quit SIGINT
 trap quit SIGTERM
 
@@ -9,16 +9,15 @@ stats_columns=("wall" "user" "system" "mem")
 stats_units=("s" "s" "s" "kB")
 print_stat() {
     local stat=($1)
+    >&2 echo -n "  "
     for ((col=0; col<${#stat[@]}; col++)); do
         >&2 echo -n "${stats_columns[col]} ${stat[col]}${stats_units[col]}  "
     done
-    echo
+    >&2 echo
 }
 
-# configure timing command
 time_cmd="/usr/bin/env time"
 time_output="/tmp/$$_envtime"
-# wall time, user CPU time, system CPU time, resident set size
 
 # available command-line arguments
 arg_nruns=5
@@ -77,18 +76,20 @@ if [[ -z "$@" ]]; then
     exit 3
 fi
 
->&2 echo
+>&2 echo "cmdline: $@"
+>&2 echo "============================================================"
+
 # gather benchmark results
 runtimes=()
 for run in $(seq 1 1 $arg_nruns); do
     >&2 echo "Run $run / $arg_nruns"
-    >&2 echo "====================="
 
 if [[ $arg_quiet == true ]]; then
     $time_cmd -f '%e %U %S %M' -o $time_output -q "$@" >/dev/null 2>&1
 else
+    >&2 echo "------------------------------------------------------------"
     >&2 $time_cmd -f '%e %U %S %M' -o $time_output -q "$@"
-    >&2 echo "---------------------"
+    >&2 echo "------------------------------------------------------------"
 fi
 
     read stat < "$time_output"
@@ -115,14 +116,15 @@ stats_variances=($(printf '%s\n' "${stats[@]}" \
         END{printf \"%.3f %.3f %.3f %.3f\",
                    se/(NR-1),su/(NR-1),ss/(NR-1),sm/(NR-1)}"))
 
->&2 echo "Means:"; >&2 echo -n "  "
-print_stat "${stats_means[*]}"
->&2 echo "Variances:"; >&2 echo -n "  "
-print_stat "${stats_variances[*]}"
+>&2 echo "Means:"
+>&2 print_stat "${stats_means[*]}"
+>&2 echo "Variances:"
+>&2 print_stat "${stats_variances[*]}"
 >&2 echo
 
 # direct json output either to stdout or a specified file
 if [[ ! -z "$arg_jsonout" ]] && [[ "$arg_jsonout" != "-" ]]; then
+    > "$arg_jsonout"
     exec 3<> "$arg_jsonout"
 else
     exec 3>&1
@@ -138,7 +140,7 @@ fi
             arg="$(sed 's/"/\\"/g' <<< "$arg")"
             # quote argument if it contains spaces
             case "$arg" in *\ *)
-                    arg="\\\"$arg\\\""
+                arg="\\\"$arg\\\""
             esac
             quoted_cmdline+=("$arg")
         done

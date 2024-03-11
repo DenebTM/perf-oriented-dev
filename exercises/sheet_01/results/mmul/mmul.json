@@ -1,0 +1,49 @@
+{
+  "cmdline": "/home/deneb/Nextcloud/Documents/Uni/2024-ss/poc/perf-oriented-dev/small_samples/build/mmul",
+  "quiet": true,
+  "nruns": 5,
+  "runs": [
+    {
+      "wall": 2.66,
+      "user": 2.65,
+      "system": 0.00,
+      "mem": 24744
+    },
+    {
+      "wall": 2.62,
+      "user": 2.61,
+      "system": 0.00,
+      "mem": 24576
+    },
+    {
+      "wall": 2.63,
+      "user": 2.63,
+      "system": 0.00,
+      "mem": 24740
+    },
+    {
+      "wall": 2.59,
+      "user": 2.59,
+      "system": 0.00,
+      "mem": 24772
+    },
+    {
+      "wall": 2.54,
+      "user": 2.53,
+      "system": 0.00,
+      "mem": 24576
+    }
+  ],
+  "mean": {
+    "wall": 2.608,
+    "user": 2.602,
+    "system": 0.000,
+    "mem": 24681.600
+  },
+  "variance": {
+    "wall": 0.002,
+    "user": 0.002,
+    "system": 0.000,
+    "mem": 9444.800
+  }
+}

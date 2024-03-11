@@ -1,0 +1,49 @@
+{
+  "cmdline": "/home/deneb/Nextcloud/Documents/Uni/2024-ss/poc/perf-oriented-dev/small_samples/build/filegen 1 1 1000000 1000000",
+  "quiet": true,
+  "nruns": 5,
+  "runs": [
+    {
+      "wall": 0.00,
+      "user": 0.00,
+      "system": 0.00,
+      "mem": 2468
+    },
+    {
+      "wall": 0.00,
+      "user": 0.00,
+      "system": 0.00,
+      "mem": 2276
+    },
+    {
+      "wall": 0.00,
+      "user": 0.00,
+      "system": 0.00,
+      "mem": 2468
+    },
+    {
+      "wall": 0.00,
+      "user": 0.00,
+      "system": 0.00,
+      "mem": 2112
+    },
+    {
+      "wall": 0.00,
+      "user": 0.00,
+      "system": 0.00,
+      "mem": 2276
+    }
+  ],
+  "mean": {
+    "wall": 0.000,
+    "user": 0.000,
+    "system": 0.000,
+    "mem": 2320.000
+  },
+  "variance": {
+    "wall": 0.000,
+    "user": 0.000,
+    "system": 0.000,
+    "mem": 22736.000
+  }
+}

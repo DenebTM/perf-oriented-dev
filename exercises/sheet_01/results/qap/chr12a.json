@@ -1,0 +1,49 @@
+{
+  "cmdline": "/home/deneb/Nextcloud/Documents/Uni/2024-ss/poc/perf-oriented-dev/small_samples/build/qap problems/chr12a.dat",
+  "quiet": false,
+  "nruns": 5,
+  "runs": [
+    {
+      "wall": 0.04,
+      "user": 0.04,
+      "system": 0.00,
+      "mem": 1508
+    },
+    {
+      "wall": 0.04,
+      "user": 0.04,
+      "system": 0.00,
+      "mem": 1508
+    },
+    {
+      "wall": 0.04,
+      "user": 0.04,
+      "system": 0.00,
+      "mem": 1536
+    },
+    {
+      "wall": 0.04,
+      "user": 0.04,
+      "system": 0.00,
+      "mem": 1508
+    },
+    {
+      "wall": 0.04,
+      "user": 0.04,
+      "system": 0.00,
+      "mem": 1344
+    }
+  ],
+  "mean": {
+    "wall": 0.040,
+    "user": 0.040,
+    "system": 0.000,
+    "mem": 1480.800
+  },
+  "variance": {
+    "wall": 0.000,
+    "user": 0.000,
+    "system": 0.000,
+    "mem": 5995.200
+  }
+}
