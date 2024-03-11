@@ -32,11 +32,12 @@ benchmarks="${@:3}"
 [[ -z "${benchmarks[@]}" ]] && print_usage
 
 
-# build everything
+# (re-)build everything
 (
     cd "$small_samples_path"
     mkcd build/
     cmake ..
+    rm $benchmarks
     make -j$(nproc) $benchmarks
     echo
 )

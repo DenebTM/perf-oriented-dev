@@ -11,14 +11,16 @@ the examples.
 ## Test environment
 
 Benchmarks were run on both my personal computer as well as an LCC3 cluster
-node. The former is described in the table below.
+node. The former is described in the table below. The disk specifications given
+are for the drive used as the working directory for all benchmarks.
 
-| Component             | Component description                    |
-| --------------------- | ---------------------------------------- |
-| CPU                   | Ryzen 9 5900X                            |
-| Memory                | 32GB DDR4                                |
-| Test disk model       | NVMe PCIe 3.0 SSD with DRAM cache        |
-| Test disk file system | Btrfs (zstd-compressed)                  |
+| Component             | Component description             |
+| --------------------- | --------------------------------- |
+| CPU                   | Ryzen 9 5900X                     |
+| Memory                | 2x16GB DDR4-3200 CL16             |
+| Disk type             | NVMe PCIe 3.0 SSD with DRAM cache |
+| Disk filesystem       | Btrfs (zstd-compressed)           |
+| GCC version           | 13.2.1                            |
 
 ## Benchmark script [B) Experiments]
 
@@ -50,15 +52,28 @@ filesearch`
 ./bench_small_samples.sh ../../small-samples ~/tempdir filesearch nbody
 ```
 
+## LCC3 Notes
+
+On LCC3 I loaded the `gcc/12.2.0-gcc-8.5.0-p4pe45v` module before building any
+of the code.
+
+I have attached the Slurm job script I used to run the benchmark script on
+LCC3. See [job01\_a.sh](job01_a.sh), as well as [job01\_b1.sh](job01_b1.sh) and
+[job01\_b2.sh](job01_b2.sh).
+
 ## Programs and test results
 
 All figures for mean and variance given in the following section were taken
 over five runs of the program. For "wall", "user", "system", and "mem", the
 columns with "(var)" show the variance, while the ones without "(var)" show the
-mean result. Unless otherwise specified, the unit for time is seconds, and for
-memory, kilobytes.
+mean result. Unless otherwise specified, runtime is specified in seconds and
+memory use in kilobytes.
 
 I saw no noteworthy patterns in memory use with any of the programs provided.
+
+Raw (JSON) output from each of the tests as performed on my personal computer
+as well as LCC3 can be found in the [results\_pc](results_pc/) and
+[results\_lcc3](results_lcc3/) directories, respectively.
 
 ### `delannoy`
 
@@ -91,6 +106,12 @@ N=16, and one hour for N=17, which I deemed simply impractical.
 | 13  | 3.184   | 3.178   | 0.000  | 1249.6 | 0.002      | 0.002      | 0.000        | 7940.8    |
 | 14  | 18.034  | 18.018  | 0.010  | 1314.4 | 0.091      | 0.087      | 0.000        | 4.8       |
 | 15  | 102.066 | 101.920 | 0.128  | 1249.6 | 0.180      | 0.226      | 0.003        | 7940.8    |
+
+The results show that indeed the runtime is exponential, with each increase of
+1 in problem size increasing the computation time by a factor of roughly 5.66.
+
+Variance is low, as is to be expected given the deterministic nature of the
+algorithm.
 
 **LCC3**:
 
@@ -140,7 +161,7 @@ generated files were deleted in between runs.
 | 100000  | 1       | 1             | 2     | 0.202 | 2.750  | 1365.6  | 0.275      | 0.000      | 0.280        | 6532.8    |
 | 1000000 | 1       | 1             | 22    | 2.062 | 28.372 | 1436.8  | 51.508     | 0.022      | 35.108       | 9603.2    |
 
-The table above primarily shows four things:
+The table above shows several things:
 
 - Each execution parameter *does* exhibit roughly linear scaling in one or
   multiple relevant performance metrics.
@@ -151,6 +172,8 @@ The table above primarily shows four things:
   generation -- certainly due to the overhead of context switching, inode
   allocation, etc.
 - Directory creation is slower than file creation.
+- For the slow test runs, there is high variance in the wall and system time
+  measurements.
 
 **LCC3**:
 
@@ -187,6 +210,15 @@ between 1B and 10kB:
 | 1000    | 1000    | 1            | 10000        | 1.588 | 0.258 | 1.320  | 1436.800 | 0.000      | 0.000      | 0.000        | 9603.200  |
 | 1000000 | 1       | 1            | 10000        | 9.664 | 1.608 | 7.226  | 1318.400 | 8.736      | 0.001      | 1.321        | 15996.800 |
 
+We can see that searching 1,000,000 files across 1,000 directories is roughly
+equivalent to the time taken searching the same number of files contained in a
+single directory. Meanwhile, searching 1,000,000 directories containing one
+file each is close to an order of magnitude slower.
+
+We once again see high variance in the wall time for the test run with
+1,000,000 directories, though curiously the variance in system time is not at
+all similar, despite the program spending 75% of its runtime in kernel space.
+
 **LCC3**:
 
 
@@ -195,13 +227,6 @@ between 1B and 10kB:
 `mmul.c` performs matrix multiplication in a serial fashion. It takes no
 command-line arguments, thus we have no means of scaling the workload without
 alterin, `nbody`g the macro `S` determining the size of the matrices being multiplied.
-
-### `nbody`
-
-`nbody.c` models a particle physics simulation with a fixed number of particles
-in a finite space over a fixed number of iterations. We again have no way of
-changing the size of the workload without modifying the code; in this case, the
-macros `N`, `M`, `L` and `SPACE_SIZE`.
 
 #### Results
 
@@ -238,19 +263,37 @@ macros `N`, `M`, `L` and `SPACE_SIZE`.
 
 `qap.c` implements a recursive algorithm solving the
 [Quadratic Assignment Problem](https://en.wikipedia.org/wiki/Quadratic_assignment_problem).
-The input is given via `.dat` files in the `problems/` directory. As the
-problem at hand is NP-hard, we cannot determine an upper bound for the runtime
-based on input size.
+Input is given via `.dat` files in the `problems/` directory. As the problem at
+hand is NP-hard, we cannot determine an upper bound for the runtime based on
+input size.
 
 After observing a runtime of well over 1 hour for a problem size of 18, I chose
-to only benchmark the input files up to a problem size of 15 on my PC. On LCC3,
-I added one input with a problem size of 18, took just a single measurement
-(rather than five), and let the job run overnight.
+to only benchmark the input files up to a problem size of 15 on my PC.
+
+On LCC3 I submitted two additional jobs with non-exclusive allocation, one each
+for `chr18a.dat` and `chr18b.dat`. Attempting to use `chr18c.dat` results in a
+segmentation fault. I allocated both jobs to the same node, took just a single
+measurement (rather than five) and let the jobs run overnight.
 
 #### Results
 
 **PC**:
 
+| input      | wall  | user  | system | mem    | wall (var) | user (var) | system (var) | mem (var) |
+| ---------- | ----- | ----- | ------ | ------ | ---------- | ---------- | ------------ | --------- |
+| chr10a.dat | 0.000 | 0.000 | 0.000  | 1442.4 | 0.000      | 0.000      | 0.000        | 8068.8    |
+| chr12a.dat | 0.040 | 0.040 | 0.000  | 1480.8 | 0.000      | 0.000      | 0.000        | 5995.2    |
+| chr12b.dat | 0.040 | 0.040 | 0.000  | 1492.0 | 0.000      | 0.000      | 0.000        | 6992.0    |
+| chr12c.dat | 0.060 | 0.060 | 0.000  | 1486.4 | 0.000      | 0.000      | 0.000        | 6532.8    |
+| chr15a.dat | 4.634 | 4.624 | 0.002  | 1360.0 | 0.004      | 0.004      | 0.000        | 9680.0    |
+| chr15b.dat | 1.252 | 1.252 | 0.000  | 1479.2 | 0.000      | 0.000      | 0.000        | 5899.2    |
+| chr15c.dat | 4.208 | 4.200 | 0.004  | 1398.4 | 0.006      | 0.006      | 0.000        | 10140.8   |
+
+We can see from the results for a problem size of 15 that problem size does not
+directly correlate with time taken -- `chr15b.dat` took only 1/4~1/3 as long to
+process as `chr15a.dat` and `chr15c.dat`. All benchmarks show very low
+variance, which is to be expected as there are no random or pseudo-random
+factors affecting computation time.
 
 **LCC3**:
 
