@@ -141,13 +141,13 @@ prog=qap
 case "$benchmarks" in *$prog*) (
     cd "$small_samples_path"/"$prog"/
     parlists=(
-        "chr10a.dat"
-        "chr12a.dat"
-        "chr12b.dat"
-        "chr12c.dat"
-        "chr15a.dat"
-        "chr15b.dat"
-        "chr15c.dat"
+        "problems/chr10a.dat"
+        "problems/chr12a.dat"
+        "problems/chr12b.dat"
+        "problems/chr12c.dat"
+        "problems/chr15a.dat"
+        "problems/chr15b.dat"
+        "problems/chr15c.dat"
     )
 
     mkdir -p "$results_path"/"$prog"

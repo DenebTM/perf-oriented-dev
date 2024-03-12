@@ -1,0 +1,1 @@
+{"cmdline":"/scratch/cb761236/perf-oriented-dev/small_samples/build/qap /scratch/cb761236/perf-oriented-dev/small_samples/qap/problems/chr18a.dat","quiet":false,"nruns":1,"runs":[{"wall":879.55,"user":877.72,"system":0.03,"mem":1492}],"mean":{"wall":879.550,"user":877.720,"system":0.030,"mem":1492.000},"variance":{"wall":"N/A","user":"N/A","system":"N/A","mem":"N/A"}}
