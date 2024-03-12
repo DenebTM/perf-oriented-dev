@@ -7,6 +7,7 @@ geometry: margin=2.5cm
 papersize: a4
 header-includes:
    - \usepackage{longtable}
+comment: PDF created using pandoc
 ---
 
 # Outline/Preparation
