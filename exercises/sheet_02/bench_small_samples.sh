@@ -24,6 +24,7 @@ bench_wrapper=""
 if [[ "$1" == "--loadgen" ]]; then
     tools_path="$(realpath "$2")"
     bench_wrapper="$PWD/exec_with_workstation_heavy.sh $tools_path"
+    results_path+="_loadgen"
     shift 2
 fi
 
