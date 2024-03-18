@@ -19,5 +19,5 @@ $dir/build/loadgen mc3 \
 $dir/build/loadgen mc3 \
     $dir/load_generator/workstation/sys_load_profile_workstation_excerpt.txt &> /dev/null &
 #time -p nice -n 100 $1
-nice -n 1000 $*
+nice -n 1000 $@
 killall loadgen &> /dev/null

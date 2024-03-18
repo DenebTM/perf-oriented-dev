@@ -25,7 +25,7 @@ bench_wrapper=""
 if [[ "$1" == "--loadgen" ]]; then
     tools_path="$(realpath "$2")"
     bench_wrapper="$PWD/exec_with_workstation_heavy.sh $tools_path"
-    results_path+="_loadgen"
+    results_path_append="_loadgen"
     shift 2
 fi
 
@@ -60,7 +60,6 @@ bench_max_runs=30
     cd "$small_samples_path"
     mkcd build/
     cmake ..
-    rm $benchmarks
     make -j$(nproc) $benchmarks
     echo
 
@@ -68,7 +67,6 @@ bench_max_runs=30
         cd "$tools_path"
         mkcd build/
         cmake ..
-        rm loadgen
         make -j$(nproc) loadgen
     fi
 )
@@ -79,10 +77,10 @@ prog=delannoy
 case "$benchmarks" in *$prog*)
     parlists=($(seq 1 15))
 
-    mkdir -p "$results_path"/"$prog"
+    mkdir -p "$results_path"/"$prog""$results_path_append"
     for parlist in "${parlists[@]}"; do (
         $bench_wrapper \
-        $bench -o "$results_path"/"$prog"/"$parlist".json \
+        $bench -o "$results_path"/"$prog""$results_path_append"/"$parlist".json \
             -n "$bench_max_runs" -e "$bench_max_err" -- \
             "$small_samples_path"/build/"$prog" $parlist
     ); done
@@ -103,13 +101,13 @@ case "$benchmarks" in *$prog*)
         "1 1 100000000 100000000"
     )
 
-    mkdir -p "$results_path"/"$prog"
+    mkdir -p "$results_path"/"$prog""$results_path_append"
     for parlist in "${parlists[@]}"; do (
         cd $workdir
         rm -rf generated/
 
         $bench_wrapper \
-        $bench -o "$results_path"/"$prog"/"$parlist".json \
+        $bench -o "$results_path"/"$prog""$results_path_append"/"$parlist".json \
             -n "$bench_max_runs" -e "$bench_max_err" -- \
             "$small_samples_path"/build/"$prog" $parlist
 
@@ -130,7 +128,7 @@ case "$benchmarks" in *$prog*)
         "10000 1 1 1"
     )
 
-    mkdir -p "$results_path"/"$prog"
+    mkdir -p "$results_path"/"$prog""$results_path_append"
     for parlist in "${prepare_parlists[@]}"; do (
         cd $workdir
 
@@ -140,7 +138,7 @@ case "$benchmarks" in *$prog*)
         cd generated/
 
         $bench_wrapper \
-        $bench -o "$results_path"/"$prog"/"$parlist".json \
+        $bench -o "$results_path"/"$prog""$results_path_append"/"$parlist".json \
             -n "$bench_max_runs" -e "$bench_max_err" -- \
             "$small_samples_path"/build/"$prog"
 
@@ -152,10 +150,10 @@ esac
 # benchmark mmul
 prog=mmul
 case "$benchmarks" in *$prog*)
-    mkdir -p "$results_path"/"$prog"
+    mkdir -p "$results_path"/"$prog""$results_path_append"
 
     $bench_wrapper \
-    $bench -o "$results_path"/"$prog"/"$prog".json \
+    $bench -o "$results_path"/"$prog""$results_path_append"/"$prog".json \
         -n "$bench_max_runs" -e "$bench_max_err" -- \
         "$small_samples_path"/build/"$prog"
 esac
@@ -164,10 +162,10 @@ esac
 # benchmark nbody
 prog=nbody
 case "$benchmarks" in *$prog*)
-    mkdir -p "$results_path"/"$prog"
+    mkdir -p "$results_path"/"$prog""$results_path_append"
 
     $bench_wrapper \
-    $bench -o "$results_path"/"$prog"/"$prog".json \
+    $bench -o "$results_path"/"$prog""$results_path_append"/"$prog".json \
         -n "$bench_max_runs" -e "$bench_max_err" -- \
         "$small_samples_path"/build/"$prog"
 esac
@@ -187,12 +185,12 @@ case "$benchmarks" in *$prog*) (
         "problems/chr15c.dat"
     )
 
-    mkdir -p "$results_path"/"$prog"
+    mkdir -p "$results_path"/"$prog""$results_path_append"
     for parlist in "${parlists[@]}"; do (
         json_filename="$(basename "${parlist%%.dat}").json"
 
         $bench_wrapper \
-        $bench -o "$results_path"/"$prog"/"$json_filename" \
+        $bench -o "$results_path"/"$prog""$results_path_append"/"$json_filename" \
             -n "$bench_max_runs" -e "$bench_max_err" -- \
             "$small_samples_path"/build/"$prog" $parlist
     ); done
