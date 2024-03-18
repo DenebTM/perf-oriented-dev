@@ -12,8 +12,9 @@ function print_usage {
     exit 1
 }
 
-# benchmark script (must be in same directory as this script)
-bench="$PWD"/benchmark.sh
+# benchmark script + arguments (must be in same directory as this script)
+#bench="$PWD/benchmark.sh -q"
+bench="$PWD/benchmark.sh"
 
 # where results JSON files will be stored
 results_path=$(realpath "results/")
@@ -81,7 +82,7 @@ case "$benchmarks" in *$prog*)
     mkdir -p "$results_path"/"$prog"
     for parlist in "${parlists[@]}"; do (
         $bench_wrapper \
-        $bench -q -o "$results_path"/"$prog"/"$parlist".json \
+        $bench -o "$results_path"/"$prog"/"$parlist".json \
             -n "$bench_max_runs" -e "$bench_max_err" -- \
             "$small_samples_path"/build/"$prog" $parlist
     ); done
@@ -108,7 +109,7 @@ case "$benchmarks" in *$prog*)
         rm -rf generated/
 
         $bench_wrapper \
-        $bench -e 0.02 -q -o "$results_path"/"$prog"/"$parlist".json \
+        $bench -o "$results_path"/"$prog"/"$parlist".json \
             -n "$bench_max_runs" -e "$bench_max_err" -- \
             "$small_samples_path"/build/"$prog" $parlist
 
@@ -139,7 +140,7 @@ case "$benchmarks" in *$prog*)
         cd generated/
 
         $bench_wrapper \
-        $bench -q -o "$results_path"/"$prog"/"$parlist".json \
+        $bench -o "$results_path"/"$prog"/"$parlist".json \
             -n "$bench_max_runs" -e "$bench_max_err" -- \
             "$small_samples_path"/build/"$prog"
 
@@ -154,7 +155,7 @@ case "$benchmarks" in *$prog*)
     mkdir -p "$results_path"/"$prog"
 
     $bench_wrapper \
-    $bench -q -o "$results_path"/"$prog"/"$prog".json \
+    $bench -o "$results_path"/"$prog"/"$prog".json \
         -n "$bench_max_runs" -e "$bench_max_err" -- \
         "$small_samples_path"/build/"$prog"
 esac
@@ -166,7 +167,7 @@ case "$benchmarks" in *$prog*)
     mkdir -p "$results_path"/"$prog"
 
     $bench_wrapper \
-    $bench -q -o "$results_path"/"$prog"/"$prog".json \
+    $bench -o "$results_path"/"$prog"/"$prog".json \
         -n "$bench_max_runs" -e "$bench_max_err" -- \
         "$small_samples_path"/build/"$prog"
 esac
