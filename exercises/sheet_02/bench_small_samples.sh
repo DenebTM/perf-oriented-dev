@@ -79,9 +79,9 @@ case "$benchmarks" in *$prog*)
 
     mkdir -p "$results_path"/"$prog""$results_path_append"
     for parlist in "${parlists[@]}"; do (
-        $bench_wrapper \
         $bench -o "$results_path"/"$prog""$results_path_append"/"$parlist".json \
             -n "$bench_max_runs" -e "$bench_max_err" -- \
+            $bench_wrapper \
             "$small_samples_path"/build/"$prog" $parlist
     ); done
 esac
@@ -106,9 +106,9 @@ case "$benchmarks" in *$prog*)
         cd $workdir
         rm -rf generated/
 
-        $bench_wrapper \
         $bench -o "$results_path"/"$prog""$results_path_append"/"$parlist".json \
             -n "$bench_max_runs" -e "$bench_max_err" -- \
+            $bench_wrapper \
             "$small_samples_path"/build/"$prog" $parlist
 
         rm -rf generated/
@@ -137,9 +137,9 @@ case "$benchmarks" in *$prog*)
         "$small_samples_path"/build/filegen $parlist
         cd generated/
 
-        $bench_wrapper \
         $bench -o "$results_path"/"$prog""$results_path_append"/"$parlist".json \
             -n "$bench_max_runs" -e "$bench_max_err" -- \
+            $bench_wrapper \
             "$small_samples_path"/build/"$prog"
 
         rm -rf generated/
@@ -152,9 +152,9 @@ prog=mmul
 case "$benchmarks" in *$prog*)
     mkdir -p "$results_path"/"$prog""$results_path_append"
 
-    $bench_wrapper \
     $bench -o "$results_path"/"$prog""$results_path_append"/"$prog".json \
         -n "$bench_max_runs" -e "$bench_max_err" -- \
+        $bench_wrapper \
         "$small_samples_path"/build/"$prog"
 esac
 
@@ -164,9 +164,9 @@ prog=nbody
 case "$benchmarks" in *$prog*)
     mkdir -p "$results_path"/"$prog""$results_path_append"
 
-    $bench_wrapper \
     $bench -o "$results_path"/"$prog""$results_path_append"/"$prog".json \
         -n "$bench_max_runs" -e "$bench_max_err" -- \
+        $bench_wrapper \
         "$small_samples_path"/build/"$prog"
 esac
 
@@ -189,9 +189,9 @@ case "$benchmarks" in *$prog*) (
     for parlist in "${parlists[@]}"; do (
         json_filename="$(basename "${parlist%%.dat}").json"
 
-        $bench_wrapper \
         $bench -o "$results_path"/"$prog""$results_path_append"/"$json_filename" \
             -n "$bench_max_runs" -e "$bench_max_err" -- \
+            $bench_wrapper \
             "$small_samples_path"/build/"$prog" $parlist
     ); done
 ); esac
