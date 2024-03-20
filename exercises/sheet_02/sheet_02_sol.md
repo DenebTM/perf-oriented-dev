@@ -35,6 +35,36 @@ optionally running either the CPU load generator (supplying the path to the
 created for the `filegen` and `filesearch` benchmarks has been reduced to
 10,000.
 
+# I/O load generator
+
+I chose to use C++, but using C file 
+
+The generator works by creating a working file of a certain size (8 GiB by
+default, configurable via an environment variable) and writing data to it.
+
+The program can be run in two primary modes: `--sequential` and `--random`. In
+sequential mode, the working file is repeatedly overwritten start-to-finish in 1
+MiB chunks, which primarily exercises the disk's sequential write performance.
+In random mode, the file will instead have random 512-byte sections , which is
+constrained primarily by the rate at which the disk can complete individiual I/O
+operations. In either mode, each block is flushed to disk immediately, in order
+to minimize the impact of write caching.
+
+By default, the program will write as fast as the disk allows, essentially
+creating a 100% I/O load. It can be limited to a specified write rate (either in
+B/s or IOPS, depending on the mode) with `--limit <rate>`.
+
+The program has a third mode, `--calib`, which can be used to measure disk
+performance. In this program, sequential and random tests are run for 10 seconds
+each, keeping track of the achieved output, then display the results in Bytes
+per second (B/s) and I/O Operations per second (IOPS) respectively.
+
+On my personal laptop, I measured around 2.6 GiB/s for sequential write and
+160,000 IOPS for random write.
+
+You may find the code in [`ioloadgen/ioloadgen.cpp`](ioloadgen/ioloadgen.cpp).
+See `--help` for additional information.
+
 # Benchmark results
 
 All figures for mean and variance given in the following section were obtained
@@ -47,7 +77,7 @@ Raw (JSON) output from each of the tests as performed on LCC3 can be found in
 
 All benchmarks were rerun for this exercise.
 
-## CPU Load Generator
+## CPU load generator
 
 I chose to measure the impact of the CPU load generator provided in the `tools`
 directory, executed using (a modified version of) the
@@ -131,7 +161,14 @@ directory, executed using (a modified version of) the
 \end{tabular}
 \end{center}
 
-## I/O Load Generator
+## I/O load generator
+
+I first measured disk performance in the `/tmp` directory on one of the worker
+noddes, then ran the `filegen` and `filesearch` benchmarks once with no external
+I/O load, then once each with an approximate 50%, and 90%, and 100% external load.
+
+Due to time constraints, I chose only to run the disk benchmarks under an
+external *random* I/O load.
 
 ## `filegen`
 

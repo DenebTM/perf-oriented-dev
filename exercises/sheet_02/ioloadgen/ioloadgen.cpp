@@ -38,22 +38,26 @@ void create_test_file(std::string filename, size_t filesize) {
 
   std::ofstream outfile(filename, std::ios::out | std::ios::binary);
 
-  // write random file in 1MiB chunks
-  for (unsigned i = 0; i < filesize / test_data_len; i++) {
-    if (signal_received)
-      break;
+  // create a large file quickly by writing a single byte at the end of it
+  outfile.seekp(filesize - 1, std::ios::beg);
+  outfile.write(test_data, 1);
 
-    outfile.write(test_data, test_data_len);
-  }
+  // write random file in 1MiB chunks
+  // for (unsigned i = 0; i < filesize / test_data_len; i++) {
+  //   if (signal_received)
+  //     break;
+  //
+  //   outfile.write(test_data, test_data_len);
+  // }
 
   // write rest of file and clean up
-  outfile.write(test_data + (test_data_len - filesize % test_data_len),
-                filesize % test_data_len);
+  // outfile.write(test_data + (test_data_len - filesize % test_data_len),
+  //               filesize % test_data_len);
 
   std::cout << " done." << std::endl;
 }
 
-size_t period_io_limit = -1;
+double period_io_limit = 1e300;
 
 size_t bytes_written;
 void write_sequential(FILE *outfile, size_t len) {
@@ -68,7 +72,9 @@ void write_sequential_throttle(FILE *outfile, size_t len) {
   write_sequential(outfile, len);
 
   if (bytes_written >= period_io_limit) {
-    auto next_wake = last_wake + (10ms * (bytes_written / period_io_limit));
+    auto next_wake =
+        last_wake + std::chrono::duration_cast<std::chrono::microseconds>(
+                        10000us * (bytes_written / period_io_limit));
     std::this_thread::sleep_until(next_wake);
     bytes_written = 0;
     last_wake = next_wake;
@@ -77,7 +83,7 @@ void write_sequential_throttle(FILE *outfile, size_t len) {
 
 size_t iops_completed;
 void write_random(FILE *outfile, size_t filesize, size_t len) {
-  int offset = rand() % filesize;
+  int offset = (rand() * len) % filesize;
   if (filesize - offset < len) {
     offset = filesize - len;
   }
@@ -94,7 +100,9 @@ void write_random_throttle(FILE *outfile, size_t filesize, size_t len) {
   write_random(outfile, filesize, len);
 
   if (iops_completed >= period_io_limit) {
-    auto next_wake = last_wake + 10ms;
+    auto next_wake =
+        last_wake + std::chrono::duration_cast<std::chrono::microseconds>(
+                        10000us * (iops_completed / period_io_limit));
     std::this_thread::sleep_until(next_wake);
     iops_completed = 0;
     last_wake = next_wake;
@@ -102,11 +110,10 @@ void write_random_throttle(FILE *outfile, size_t filesize, size_t len) {
 }
 
 void print_usage(const char *program_name) {
-  printf("Usage:\t%s [--limit <calib IOPS | B/s> <fraction thereof>] "
-         "<--random|--sequential|--calib>\n",
+  printf("Usage:\t%s [--limit <IOPS | B/s>] <--random|--sequential|--calib>\n",
          program_name);
-  printf("E.g.:\t%s --limit 80000 0.1 --random\n", program_name);
-  printf("\tLoad system with 8000 IOPS (~10%% of calibrated maximum)\n");
+  printf("E.g.:\t%s --limit 8000 --random\n", program_name);
+  printf("\tLoad system with 8000 IOPS\n");
   printf("\nEnvironment variables:\n");
   printf("  TMP\t\t directory to store workfile\t(default: /tmp)\n");
   printf("  WORKFILE_SIZE\t size of workfile\t\t(default: 8G)\n");
@@ -162,14 +169,13 @@ int main(int argc, char *argv[]) {
     } else if (arg == "-c" || arg == "--calib") {
       mode = CALIB;
     } else if (arg == "-l" || arg == "--limit") {
-      if (argc - (i + 2) <= 0) {
+      if (argc - (i + 1) <= 0) {
         print_usage(argv[0]);
       }
 
-      io_limit = atoll(argv[i + 1]);
-      io_limit *= strtod(argv[i + 2], NULL);
-
-      period_io_limit = io_limit / 100;
+      io_limit = atof(argv[i + 1]);
+      period_io_limit = io_limit / 100.0;
+    } else if (arg == "-r" || arg == "--reuse") {
     }
   }
 
@@ -188,7 +194,7 @@ int main(int argc, char *argv[]) {
     init_test_data(SEQUENTIAL_WRITE_COUNT);
     create_test_file(filename, filesize);
 
-    std::cout << "Creating sequential I/O load until killed by signal."
+    std::cout << "Creating sequential I/O load until stopped by signal."
               << std::endl;
 
     while (!signal_received) {
@@ -207,7 +213,7 @@ int main(int argc, char *argv[]) {
     init_test_data(SEQUENTIAL_WRITE_COUNT);
     create_test_file(filename, filesize);
 
-    std::cout << "Creating random I/O load until killed by signal."
+    std::cout << "Creating random I/O load until stopped by signal."
               << std::endl;
 
     FILE *outfile = fopen(filename.c_str(), "r+");

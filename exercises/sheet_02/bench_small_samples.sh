@@ -8,7 +8,7 @@ trap quit SIGTERM
 function mkcd { mkdir -p $1 && cd $1; }
 
 function print_usage {
-    echo "Usage: $0 [--loadgen <path/to/tools>] <path/to/small_samples> <path/to/workdir> <list of programs...>"
+    echo "Usage: $0 [--loadgen <path/to/tools> | --ioloadgen <path/to/ioloadgen> <IOPS>] <path/to/small_samples> <path/to/workdir> <list of programs...>"
     exit 1
 }
 
@@ -21,12 +21,19 @@ results_path=$(realpath "results/")
 
 # whether or not to run `loadgen` in the background
 tools_path=""
+ioloadgen_path=""
+ioloadgen_iops=0
 bench_wrapper=""
 if [[ "$1" == "--loadgen" ]]; then
     tools_path="$(realpath "$2")"
     bench_wrapper="$PWD/exec_with_workstation_heavy.sh $tools_path"
     results_path_append="_loadgen"
     shift 2
+elif [[ "$1" == "--ioloadgen" ]]; then
+    ioloadgen_path="$(realpath "$2")"
+    ioloadgen_iops="$3"
+    results_path_append="_ioloadgen_$ioloadgen_iops"
+    shift 3
 fi
 
 # where the sample programs are located (from cmdline)
@@ -68,6 +75,9 @@ bench_max_runs=30
         mkcd build/
         cmake ..
         make -j$(nproc) loadgen
+    elif [[ ! -z "$ioloadgen_path" ]]; then
+        cd "$ioloadgen_path"
+        make all
     fi
 )
 
@@ -106,10 +116,21 @@ case "$benchmarks" in *$prog*)
         cd $workdir
         rm -rf generated/
 
+        if [[ ! -z "$ioloadgen_path" ]]; then
+            TMP="$workdir" "$ioloadgen_path/ioloadgen" --random --limit $ioloadgen_iops &
+            sleep 3 # wait a bit for I/O load to stabilize
+        fi
+
         $bench -o "$results_path"/"$prog""$results_path_append"/"$parlist".json \
             -n "$bench_max_runs" -e "$bench_max_err" -- \
             $bench_wrapper \
             "$small_samples_path"/build/"$prog" $parlist
+
+        if [[ ! -z "$ioloadgen_path" ]]; then
+            killall ioloadgen
+            while pgrep ioloadgen &>/dev/null; do sleep 0.1; done
+        fi
+        
 
         rm -rf generated/
     ); done
@@ -125,7 +146,6 @@ case "$benchmarks" in *$prog*)
         "100 1 1 1000"
         "100 100 1 10000"
         "10000 1 1 10000"
-        "10000 1 1 1"
     )
 
     mkdir -p "$results_path"/"$prog""$results_path_append"
@@ -137,10 +157,20 @@ case "$benchmarks" in *$prog*)
         "$small_samples_path"/build/filegen $parlist
         cd generated/
 
+        if [[ ! -z "$ioloadgen_path" ]]; then
+            TMP="$workdir" "$ioloadgen_path/ioloadgen" --random --limit $ioloadgen_iops &
+            sleep 3 # wait a bit for I/O load to stabilize
+        fi
+        
         $bench -o "$results_path"/"$prog""$results_path_append"/"$parlist".json \
             -n "$bench_max_runs" -e "$bench_max_err" -- \
             $bench_wrapper \
             "$small_samples_path"/build/"$prog"
+
+        if [[ ! -z "$ioloadgen_path" ]]; then
+            killall ioloadgen
+            while pgrep ioloadgen &>/dev/null; do sleep 0.1; done
+        fi
 
         rm -rf generated/
     ); done
