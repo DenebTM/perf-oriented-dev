@@ -110,7 +110,8 @@ void write_random_throttle(FILE *outfile, size_t filesize, size_t len) {
 }
 
 void print_usage(const char *program_name) {
-  printf("Usage:\t%s [--limit <IOPS | B/s>] <--random|--sequential|--calib>\n",
+  printf("Usage:\t%s [--limit <IOPS | B/s>] <--random|--sequential|--calib "
+         "DURATION>\n",
          program_name);
   printf("E.g.:\t%s --limit 8000 --random\n", program_name);
   printf("\tLoad system with 8000 IOPS\n");
@@ -159,6 +160,7 @@ int main(int argc, char *argv[]) {
   // set program mode and I/O limit from command line
   ProgramMode mode = UNSET;
   size_t io_limit = 0;
+  int calib_duration = 10;
   for (int i = 1; i < argc; i++) {
     std::string arg = std::string(argv[i]);
 
@@ -167,7 +169,12 @@ int main(int argc, char *argv[]) {
     } else if (arg == "-s" || arg == "--sequential") {
       mode = SEQUENTIAL;
     } else if (arg == "-c" || arg == "--calib") {
+      if (argc - (i + 1) <= 0) {
+        print_usage(argv[0]);
+      }
+
       mode = CALIB;
+      calib_duration = atol(argv[i + 1]);
     } else if (arg == "-l" || arg == "--limit") {
       if (argc - (i + 1) <= 0) {
         print_usage(argv[0]);
@@ -231,13 +238,14 @@ int main(int argc, char *argv[]) {
 
     FILE *outfile = fopen(filename.c_str(), "r+");
 
-    std::cout << "Testing sequential write performance..." << std::endl;
+    std::cout << "Testing sequential write performance..." << std::flush;
 
     auto calib_sequential_start = std::chrono::system_clock::now();
-    while (calib_sequential_start + 10s > std::chrono::system_clock::now()) {
+    while (calib_sequential_start + (calib_duration * 1s) >
+           std::chrono::system_clock::now()) {
       for (size_t pos = 0; pos < filesize; pos += test_data_len) {
-        if (signal_received ||
-            calib_sequential_start + 10s > std::chrono::system_clock::now())
+        if (signal_received || calib_sequential_start + (calib_duration * 1s) <=
+                                   std::chrono::system_clock::now())
           break;
 
         write_sequential(outfile, test_data_len);
@@ -254,11 +262,13 @@ int main(int argc, char *argv[]) {
 
     size_t bytes_per_second =
         bytes_written / ((double)calib_sequential_duration.count() / 1000);
+    std::cout << "\t" << bytes_per_second << " B/s" << std::endl;
 
-    std::cout << "Testing random write performance..." << std::endl;
+    std::cout << "Testing random write performance..." << std::flush;
 
     auto calib_random_start = std::chrono::system_clock::now();
-    while (calib_random_start + 10s > std::chrono::system_clock::now()) {
+    while (calib_random_start + (calib_duration * 1s) >
+           std::chrono::system_clock::now()) {
       if (signal_received)
         break;
 
@@ -271,9 +281,7 @@ int main(int argc, char *argv[]) {
 
     size_t iops =
         iops_completed / ((double)calib_random_duration.count() / 1000);
-
-    std::cout << "sequential:\t" << bytes_per_second << " B/s" << std::endl;
-    std::cout << "random:\t\t" << iops << " IOPS" << std::endl;
+    std::cout << "\t" << iops << " IOPS" << std::endl;
 
   } break;
 
