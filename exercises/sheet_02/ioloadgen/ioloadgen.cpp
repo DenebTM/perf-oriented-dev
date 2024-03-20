@@ -34,7 +34,7 @@ void init_test_data(size_t len) {
 }
 
 void create_test_file(std::string filename, size_t filesize) {
-  std::cout << "Preparing workfile..." << std::flush;
+  std::cout << "Preparing workfile at " << filename << "..." << std::flush;
 
   std::ofstream outfile(filename, std::ios::out | std::ios::binary);
 
@@ -175,7 +175,6 @@ int main(int argc, char *argv[]) {
 
       io_limit = atof(argv[i + 1]);
       period_io_limit = io_limit / 100.0;
-    } else if (arg == "-r" || arg == "--reuse") {
     }
   }
 
@@ -237,10 +236,11 @@ int main(int argc, char *argv[]) {
     auto calib_sequential_start = std::chrono::system_clock::now();
     while (calib_sequential_start + 10s > std::chrono::system_clock::now()) {
       for (size_t pos = 0; pos < filesize; pos += test_data_len) {
-        write_sequential(outfile, test_data_len);
-
-        if (signal_received)
+        if (signal_received ||
+            calib_sequential_start + 10s > std::chrono::system_clock::now())
           break;
+
+        write_sequential(outfile, test_data_len);
       }
       fseek(outfile, 0, SEEK_SET);
 
@@ -259,10 +259,10 @@ int main(int argc, char *argv[]) {
 
     auto calib_random_start = std::chrono::system_clock::now();
     while (calib_random_start + 10s > std::chrono::system_clock::now()) {
-      write_random(outfile, filesize, RANDOM_WRITE_COUNT);
-
       if (signal_received)
         break;
+
+      write_random(outfile, filesize, RANDOM_WRITE_COUNT);
     }
     auto calib_random_end = std::chrono::system_clock::now();
     auto calib_random_duration =
