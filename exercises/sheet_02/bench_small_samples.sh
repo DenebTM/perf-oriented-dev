@@ -8,7 +8,7 @@ trap quit SIGTERM
 function mkcd { mkdir -p $1 && cd $1; }
 
 function print_usage {
-    echo "Usage: $0 [--loadgen <path/to/tools> | --ioloadgen <path/to/ioloadgen> <IOPS>] <path/to/small_samples> <path/to/workdir> <list of programs...>"
+    echo "Usage: $0 [--loadgen <path/to/tools> | --ioloadgen <path/to/ioloadgen> <write rate>] <path/to/small_samples> <path/to/workdir> <list of programs...>"
     exit 1
 }
 
@@ -22,7 +22,7 @@ results_path=$(realpath "results/")
 # whether or not to run `loadgen` in the background
 tools_path=""
 ioloadgen_path=""
-ioloadgen_iops=0
+ioloadgen_bps=0
 bench_wrapper=""
 if [[ "$1" == "--loadgen" ]]; then
     tools_path="$(realpath "$2")"
@@ -31,8 +31,8 @@ if [[ "$1" == "--loadgen" ]]; then
     shift 2
 elif [[ "$1" == "--ioloadgen" ]]; then
     ioloadgen_path="$(realpath "$2")"
-    ioloadgen_iops="$3"
-    results_path_append="_ioloadgen_$ioloadgen_iops"
+    ioloadgen_bps="$3"
+    results_path_append="_ioloadgen_$ioloadgen_bps"
     shift 3
 fi
 
@@ -117,8 +117,8 @@ case "$benchmarks" in *$prog*)
         rm -rf generated/
 
         if [[ ! -z "$ioloadgen_path" ]]; then
-            TMP="$workdir" "$ioloadgen_path/ioloadgen" --random --limit $ioloadgen_iops &
-            sleep 3 # wait a bit for I/O load to stabilize
+            TMP="$workdir" "$ioloadgen_path/ioloadgen" --sequential --limit $ioloadgen_bps &
+            sleep 10 # wait a bit for I/O load to stabilize
         fi
 
         $bench -o "$results_path"/"$prog""$results_path_append"/"$parlist".json \
@@ -158,8 +158,8 @@ case "$benchmarks" in *$prog*)
         cd generated/
 
         if [[ ! -z "$ioloadgen_path" ]]; then
-            TMP="$workdir" "$ioloadgen_path/ioloadgen" --random --limit $ioloadgen_iops &
-            sleep 3 # wait a bit for I/O load to stabilize
+            TMP="$workdir" "$ioloadgen_path/ioloadgen" --sequential --limit $ioloadgen_bps &
+            sleep 10 # wait a bit for I/O load to stabilize
         fi
         
         $bench -o "$results_path"/"$prog""$results_path_append"/"$parlist".json \
