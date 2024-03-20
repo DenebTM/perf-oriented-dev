@@ -59,7 +59,7 @@ benchmarks="${@:3}"
 # run benchmark until statistical error does not exceed this value
 bench_max_err=0.05
 # maximum benchmark passes before giving up on reaching error bound (0 => inf)
-bench_max_runs=30
+bench_max_runs=15
 
 
 # (re-)build everything
