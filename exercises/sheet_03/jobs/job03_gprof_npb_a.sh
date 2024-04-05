@@ -25,4 +25,4 @@ cd "$builddir"
 cmake -DCMAKE_C_FLAGS=-pg -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 make -j$(nproc) npb_bt_a
 
-GMON_OUT_PREFIX=1 ./npb_bt_a
+./npb_bt_a
