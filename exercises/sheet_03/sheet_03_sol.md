@@ -2,7 +2,7 @@
 title: "Exercise 03"
 subtitle: "VU Performance-oriented Computing, Summer Semester 2024"
 author: Calvin Hoy
-date: 2024-04-03
+date: 2024-04-07
 geometry: margin=2.5cm
 papersize: a4
 header-includes:
@@ -27,7 +27,7 @@ build is counterproductive.
 Calling `gprof <binary> [<gmon.out>]` without any other arguments prints the
 flat profile and call graph. Consult the man page for additional information.
 
-I chose to focus on the workload sizes `_w` and `_b` for closer examination.
+I chose to focus on the workload sizes W and B for closer examination.
 
 Note: On LCC3, the module `binutils/2.37` must be loaded, as the version of
 `gprof` available by default (<2.35) is not able to process the generated
@@ -38,7 +38,7 @@ profile information.
 For brevity, most functions taking less than 1 percent of execution time were
 omitted from the following output.
 
-**W:**
+*W:*
 
 ```
   %   cumulative   self              self     total           
@@ -61,7 +61,8 @@ The flat profile (captured on my local machine) shows that about 29 percent of
 execution time is spent in the function `binvcrhs`. A further 15 percent is
 spent in `matmul_sub`, and just under 14 percent each in `x`/`y`/`z_solve`.
 
-**B:** 
+\pagebreak
+*B:* 
 
 ```
   %   cumulative   self              self     total           
@@ -163,8 +164,8 @@ The above (truncated) call graph reveals the following:
 printing an execution count beside each line with a function definition, as well
 as a short summary showing which lines (functions) were executed most often.
 
-I found this output to be not very useful, as it is essentially just a less
-concise form of the flat profile.
+I found this not to be of much use, as it is essentially just a less concise
+form of the flat profile.
 
 ### Comparing with LCC3
 
@@ -213,48 +214,170 @@ index % time    self  children    called     name
 [...]
 ```
 
-By the call graph, it appears as though `adi` was called directly at the
-program entry point. Optimization / inlining?
+From the call graph, it appears as though `adi` was called directly at the
+program entry point.\
+Optimization / inlining?
 
 # B) Hybrid trace profiling
 
-# Test table please ignore
+## Preparation
+
+Tracy must be integrated with the source code to be profiled. Tracy itself is
+written in C++, and although a C API is provided via `tracy/TracyC.h`, I
+switched the project language to C++ instead, which necessitated some further
+adjustments to the code.
+
+The modified source code (including relevant header and source files for Tracy
+v0.10) may be found in `npb_bt_tracy`. Configure the CMake project with
+`-DTRACY_ENABLE=On` to create a profiling build.
+
+### Frames
+
+Tracy works on the concept of "frames", as in "frames per second" in e.g. a
+videogame. The macro `FrameMark` is provided to demark the end of one such
+frame.
+
+The most natural mapping to me seemed to be the loop over time steps, as it is
+in effect the main loop of the program:
+
+```
+[...]
+  for (step = 1; step <= niter; step++) {
+    if ((step % 20) == 0 || step == 1) {
+      printf(" Time step %4d\n", step);
+    }
+
+    adi();
+
+    FrameMark;
+  }
+[...]
+```
+
+### Zone annotations
+
+"Zones" are central to the concept of tracing. Thus, Tracy provides the
+`ZoneScoped` macro to be added at the start of each interesting function.
+
+Variations on the `ZoneScoped` macro are also available -- the `N` suffix for
+giving the zone a custom name, the `C` suffix for setting a custom colour, and
+the `S` suffix to capture the call stack at zone entry. None of these were
+utilised.
+
+Usage of zones is somewhat more involved when using the C API, which is another
+reason I chose to make the existing source code C++-compatible instead.
+
+I annotated the following functions, most of which were pointed out by `gprof`
+to have at least 201 executions. The very busiest functions were not annotated
+so as to limit the number of zones created, and thus the performance impact.
+
+- `initialize`
+- `add`
+- `adi`
+- `exact_rhs`
+- `exact_solution`
+- `lhsinit`
+- `compute_rhs`
+- `binvrhs`
+- `x`/`y`/`z_solve`
+
+![Tracy profiler, workload size C](tracy.png)
+
+The section in red before the first frame shows the time that Tracy itself took
+to initialize.
+
+As I did not put a `FrameMark` between the initialization code and the first run
+of the loop, the first frame also includes the runtime of all initialization code.
+
+CPU usage is elevated during the two calls to `initialize` -- this is due to
+Tracy itself collecting profiling information for all the zones created by
+`exact_solution`. For the remaining program duration, CPU usage is reported at
+around 5 percent -- which amounts to full load on a single core on my system.
+
+![Tracy profiler, workload size W](tracy2.png)
+
+We can see that the initialization time amounts to roughly 2x the runtime of one
+iteration of the main loop for both workload sizes W and C.
+
+\pagebreak
+## Measuring performance overhead
+
+I compared the runtime of the modified source code for the workload sizes
+W, A and C, using the following project configurations:
+
+- none: `-DCMAKE_BUILD_TYPE=RelWithDebInfo`
+- tracy: `-DCMAKE_BUILD_TYPE=RelWithDebInfo -DTRACY_ENABLE=On`
+- gprof: `-DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_CXX_FLAGS=-pg`
+
+This amounts in all cases to a build with optimization level `-O2` and debug
+symbols included.
+
+Note that due to changing the project language to C++, the variable
+`CMAKE_CXX_FLAGS` was used in place of `CMAKE_C_FLAGS` (as in the first part of
+this exercise sheet).
+
+All benchmarks were conducted on a Ryzen 9 5900X. Workload size `C` was tested only once, with all
+three variants being run simultaneously and bound to cores 0, 2 and 4 of CCD 0 respectively (in
+order to ensure that none have a thermal / clock speed advantage). The other workload sizes were run
+in sequence and averaged over five runs each. The Tracy profiling application was not running during
+the test.
 
 \begin{center}
-\begin{longtable}{|l|l l|r r r r|r r r r|}
+\begin{tabular}{|l|l|r r r|r r r|r|}
     \hline
-    I/O load &&& \multicolumn{4}{c|}{\textbf{Mean}} & \multicolumn{4}{c|}{\textbf{Variance}} \\
-             & dirs & files & wall & user & system & mem & wall & user & system & mem \\
+                &               & \multicolumn{3}{c|}{\textbf{Mean}}    
+                                & \multicolumn{3}{c|}{\textbf{Variance}} 
+                                & \\
+    Workload    & Configuration & wall & user & system      & wall & user & system  & Overhead \\
     \hline
+
+    W           & none          & 1.206  & 1.204  & 0.000   & 0.001 & 0.001 & 0.000 & - \\
+                & tracy         & 1.514  & 1.244  & 0.158   & 0.000 & 0.000 & 0.000 & $+25.54 \%$ \\
+                & gprof         & 1.252  & 1.248  & 0.000   & 0.001 & 0.001 & 0.000 & $+ 3.81 \%$ \\
     \hline
-    \endhead
 
+    A           & none          & 26.316 & 26.282 & 0.028   & 0.174 & 0.173 & 0.000 & - \\
+                & tracy         & 29.172 & 28.188 & 1.376   & 0.095 & 0.099 & 0.002 & $+10.85 \%$ \\
+                & gprof         & 28.146 & 28.100 & 0.038   & 0.240 & 0.237 & 0.000 & $+ 6.95 \%$ \\
     \hline
-    \endfoot
 
-    - & 1 & 100 & 0.000 & 0.000 & 0.000 & 1458.667 & 0.000 & 0.000 & 0.000 & 3621.333 \\
-    - & 1 & 10000 & 0.010 & 0.000 & 0.010 & 1409.333 & 0.000 & 0.000 & 0.000 & 5477.333 \\
-    - & 100 & 1 & 0.000 & 0.000 & 0.000 & 1416.000 & 0.000 & 0.000 & 0.000 & 624.000 \\
-    - & 100 & 100 & 0.010 & 0.000 & 0.010 & 1440.000 & 0.000 & 0.000 & 0.000 & 448.000 \\
-    - & 10000 & 1 & 0.080 & 0.013 & 0.063 & 1556.000 & 0.000 & 0.000 & 0.000 & 48.000 \\
-    - & 10000 & 1 & 0.080 & 0.010 & 0.067 & 1489.333 & 0.000 & 0.000 & 0.000 & 4181.333 \\
-
-    10 MiB/s & 1 & 100 & 0.000 & 0.000 & 0.000 & 1457.333 & 0.000 & 0.000 & 0.000 & 5541.333 \\
-    10 MiB/s & 1 & 10000 & 0.010 & 0.000 & 0.010 & 1454.667 & 0.000 & 0.000 & 0.000 & 2021.333 \\
-    10 MiB/s & 100 & 1 & 0.000 & 0.000 & 0.000 & 1436.000 & 0.000 & 0.000 & 0.000 & 336.000 \\
-    10 MiB/s & 100 & 100 & 0.010 & 0.000 & 0.010 & 1445.333 & 0.000 & 0.000 & 0.000 & 741.333 \\
-    10 MiB/s & 10000 & 1 & 0.083 & 0.010 & 0.067 & 1536.000 & 0.000 & 0.000 & 0.000 & 2032.000 \\
-
-    50 MiB/s & 1 & 100 & 0.000 & 0.000 & 0.000 & 1466.667 & 0.000 & 0.000 & 0.000 & 4501.333 \\
-    50 MiB/s & 1 & 10000 & 0.010 & 0.000 & 0.010 & 1486.667 & 0.000 & 0.000 & 0.000 & 4037.333 \\
-    50 MiB/s & 100 & 1 & 0.000 & 0.000 & 0.000 & 1453.333 & 0.000 & 0.000 & 0.000 & 5957.333 \\
-    50 MiB/s & 100 & 100 & 0.010 & 0.000 & 0.010 & 1438.667 & 0.000 & 0.000 & 0.000 & 341.333 \\
-    50 MiB/s & 10000 & 1 & 0.080 & 0.010 & 0.067 & 1428.000 & 0.000 & 0.000 & 0.000 & 768.000 \\
-    
-    100 MiB/s & 1 & 100 & 0.000 & 0.000 & 0.000 & 1420.000 & 0.000 & 0.000 & 0.000 & 15424.000 \\
-    100 MiB/s & 1 & 10000 & 0.010 & 0.000 & 0.010 & 1365.333 & 0.000 & 0.000 & 0.000 & 6165.333 \\
-    100 MiB/s & 100 & 1 & 0.000 & 0.000 & 0.000 & 1458.667 & 0.000 & 0.000 & 0.000 & 485.333 \\
-    100 MiB/s & 100 & 100 & 0.010 & 0.000 & 0.010 & 1490.667 & 0.000 & 0.000 & 0.000 & 1605.333 \\
-    100 MiB/s & 10000 & 1 & 0.080 & 0.010 & 0.067 & 1465.333 & 0.000 & 0.000 & 0.000 & 917.333 \\
-\end{longtable}
+    C           & none          & 461.94 & 459.90 & 1.98    & - & - & - & - \\
+                & tracy         & 523.89 & 501.04 & 22.44   & - & - & - & $+13.41 \%$ \\
+                & gprof         & 499.26 & 498.26 & 0.78    & - & - & - & $+ 8.08 \%$ \\
+    \hline
+\end{tabular}
 \end{center}
+
+### Observations
+
+- Tracy, as used here, has a greater performance overhead than `gprof`, and the
+  overhead is most exaggerated for the small workload size.
+
+- The unprofiled program runs almost entirely in userspace (> 99.5 percent).
+  Tracy evidently adds a lot of context switches, raising the time spent in
+  kernel space to just over 4 percent -- likely due to its TCP-based
+  communication. `perf stat` (run as `root`) confirms this:
+
+    **none:**
+
+    ```
+     Performance counter stats for './npb_bt_w':
+
+              1,223.56 msec task-clock                       #    1.000 CPUs utilized             
+                     1      context-switches                 #    0.817 /sec                      
+    [...]
+    ```
+
+    **tracy:**
+
+    ```
+     Performance counter stats for './npb_bt_w':
+
+              1,386.54 msec task-clock                       #    0.879 CPUs utilized             
+                 1,476      context-switches                 #    1.065 K/sec                     
+    [...]
+    ```
+
+- Curiously, the `gprof` configuration spent less time in kernel space for
+  workload size C, and this held true for a second run (not included in the
+  table).
