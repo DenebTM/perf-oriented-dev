@@ -9,8 +9,9 @@ A) Memory profiling
 In `larger_samples` you find two somewhat larger C programs. The first one you are already familiar with. The second one, "SSCA2", takes a "scale" as its command line parameter -- use `ssca2 17` for this exercise.
 
 For both programs:
- * Use the valgrind "massif" tool in Valgrind to determine the largest sources of heap memory utilization, and visualize the results with "massif-visualizer".
- * How significant is the perturbation in execution time caused by using massif?
+
+ - Use the valgrind "massif" tool in Valgrind to determine the largest sources of heap memory utilization, and visualize the results with "massif-visualizer".
+ - How significant is the perturbation in execution time caused by using massif?
 
 Summarize, interpret and report your findings.
 
@@ -20,8 +21,9 @@ B) Measuring CPU counters
 For both programs, measure **all** events in the `[Hardware cache event]` category reported by `perf list`. Note that as discussed in the lecture, there is a limit on the number of hardware counters you can measure in a single run.
 
 For both programs:
- * Report the results in **relative** metrics, and compare these between the programs.
- * How significant is the perturbation in execution time caused by using perf to measure performance counters?
+
+ - Report the results in **relative** metrics, and compare these between the programs.
+ - How significant is the perturbation in execution time caused by using perf to measure performance counters?
 
 Summarize, interpret and report your findings.
 
