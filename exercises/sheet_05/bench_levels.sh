@@ -1,17 +1,38 @@
 #!/usr/bin/env bash
 
-bench="./benchmark.sh"
+workdir="$(realpath .)"
+bench="$(realpath ./benchmark.sh)"
 
-run_benchmark() {
-    
-}
+# return 77 from subshell to kill script
+set -E
+trap '[ "$?" -ne 77 ] || exit 77' ERR
 
 progs=(
-    ""
+    "mmul"
+    "nbody"
+    "qap $workdir/test_cases/qap/chr15c.dat"
+    "delannoy 13"
+    "npb_bt_w"
+    "ssca2 15"
 )
 
 levels=("-O0" "-O1" "-O2" "-O3" "-Os" "-Ofast")
 
-for level in "${levels[@]}"; do
-    
-done
+(
+    cd test_cases
+    for level in "${levels[@]}"; do (
+        builddir="build_$level"
+        mkdir -p "$builddir" && cd "$builddir" \
+        || ( echo "Could not create or enter directory $builddir"; exit 77 )
+
+        cmake -DCMAKE_C_FLAGS="$level" ..
+        make -j$(nproc)
+
+        for prog in "${progs[@]}"; do (
+            prog_args=($prog)
+            
+            mkdir -p "$workdir/results/$prog_args"
+            "$bench" -n 10 -o "$workdir/results/$prog_args/$level.json" -- ./${prog_args[*]}
+        ); done
+    ); done
+)
