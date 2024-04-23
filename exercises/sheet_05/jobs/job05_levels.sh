@@ -3,9 +3,9 @@
 # Execute job in the partition "lva" unless you have special requirements.
 #SBATCH --partition=lva
 # Name your job to be able to identify it later
-#SBATCH --job-name sheet02_delannoy_loadgen
+#SBATCH --job-name sheet05_levels
 # Redirect output stream to this file
-#SBATCH --output=output02_delannoy_loadgen.log
+#SBATCH --output=output05_levels.log
 # Maximum number of tasks (=processes) to start in total
 #SBATCH --ntasks=1
 # Maximum number of tasks (=processes) to start per node
