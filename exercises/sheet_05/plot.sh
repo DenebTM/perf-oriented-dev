@@ -17,8 +17,11 @@ set key outside
 set style data histograms
 set style fill solid 1.0 border lt -1
 
+set xtics nomirror
+set xtics format " "
 set y2range [0:*]
 set y2tics
+set ytics nomirror
 
 plot "plot.dat" using 2:xtic(1) linecolor 1 title "wall", \
     "" using 3:xtic(1) linecolor 2 title "user", \
