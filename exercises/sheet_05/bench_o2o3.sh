@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 opts=(
+    ""
     "-fgcse-after-reload"
     "-fipa-cp-clone"
     "-floop-interchange"
