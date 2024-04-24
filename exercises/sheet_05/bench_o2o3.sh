@@ -28,7 +28,7 @@ for opt in "${opts[@]}"; do
 done
 
 echo "Waiting for jobs"
-while sq -u $USER | grep -v JOBID >/dev/null; do
+while squeue -u $USER | grep -v JOBID >/dev/null; do
     sleep 1
     echo -n .
 done
