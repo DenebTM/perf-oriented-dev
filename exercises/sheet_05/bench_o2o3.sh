@@ -22,7 +22,7 @@ tmp_jobdir="/tmp/${USER}_jobs_o2o3"
 mkdir -p "$tmp_jobdir"
 for opt in "${opts[@]}"; do
     export TESTFLAG="$opt"
-    envsubst '$TESTFLAG' < template_job05_o2o3.sh > "$tmp_jobdir/$opt.sh"
+    envsubst '$TESTFLAG' < jobs/template_job05_o2o3.sh > "$tmp_jobdir/$opt.sh"
 
     sbatch "$tmp_jobdir/$opt.sh"
 done
