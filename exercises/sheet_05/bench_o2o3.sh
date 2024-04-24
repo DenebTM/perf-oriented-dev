@@ -12,7 +12,6 @@ opts=(
     "-fsplit-paths"
     "-ftree-loop-distribution"
     "-ftree-partial-pre"
-    "-funroll-completely-grow-size"
     "-funswitch-loops"
     "-fvect-cost-model=dynamic"
     "-fversion-loops-for-strides"

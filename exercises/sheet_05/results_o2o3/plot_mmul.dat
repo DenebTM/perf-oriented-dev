@@ -1,0 +1,15 @@
+opt mmul
+none 1.990
+-fgcse-after-reload 2.003
+-fipa-cp-clone 1.993
+-floop-interchange 2.028
+-floop-unroll-and-jam 2.000
+-fpeel-loops 2.070
+-fpredictive-commoning 2.065
+-fsplit-loops 1.990
+-fsplit-paths 1.990
+-ftree-loop-distribution 1.993
+-ftree-partial-pre 1.983
+-funswitch-loops 1.983
+-fvect-cost-model=dynamic 2.007
+-fversion-loops-for-strides 1.980

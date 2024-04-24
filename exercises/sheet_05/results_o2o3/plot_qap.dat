@@ -1,0 +1,15 @@
+opt qap
+none 3.120
+-fgcse-after-reload 3.123
+-fipa-cp-clone 3.110
+-floop-interchange 3.127
+-floop-unroll-and-jam 3.120
+-fpeel-loops 3.113
+-fpredictive-commoning 3.117
+-fsplit-loops 3.100
+-fsplit-paths 3.110
+-ftree-loop-distribution 3.100
+-ftree-partial-pre 3.107
+-funswitch-loops 3.153
+-fvect-cost-model=dynamic 3.113
+-fversion-loops-for-strides 3.180

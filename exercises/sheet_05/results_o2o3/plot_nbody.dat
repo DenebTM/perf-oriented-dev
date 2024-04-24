@@ -1,0 +1,15 @@
+opt nbody
+none 2.563
+-fgcse-after-reload 2.560
+-fipa-cp-clone 2.550
+-floop-interchange 2.557
+-floop-unroll-and-jam 2.570
+-fpeel-loops 2.560
+-fpredictive-commoning 2.560
+-fsplit-loops 2.550
+-fsplit-paths 2.560
+-ftree-loop-distribution 2.550
+-ftree-partial-pre 2.557
+-funswitch-loops 2.550
+-fvect-cost-model=dynamic 2.560
+-fversion-loops-for-strides 2.550

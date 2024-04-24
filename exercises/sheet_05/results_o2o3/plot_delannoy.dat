@@ -1,0 +1,15 @@
+opt delannoy
+none 3.240
+-fgcse-after-reload 3.240
+-fipa-cp-clone 3.223
+-floop-interchange 3.230
+-floop-unroll-and-jam 3.220
+-fpeel-loops 3.233
+-fpredictive-commoning 3.230
+-fsplit-loops 3.230
+-fsplit-paths 3.230
+-ftree-loop-distribution 3.220
+-ftree-partial-pre 3.353
+-funswitch-loops 3.220
+-fvect-cost-model=dynamic 3.230
+-fversion-loops-for-strides 3.230

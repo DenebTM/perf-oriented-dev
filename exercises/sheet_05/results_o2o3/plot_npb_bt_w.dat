@@ -1,0 +1,15 @@
+opt npb_bt_w
+none 3.227
+-fgcse-after-reload 3.230
+-fipa-cp-clone 3.210
+-floop-interchange 3.227
+-floop-unroll-and-jam 3.193
+-fpeel-loops 3.083
+-fpredictive-commoning 3.223
+-fsplit-loops 3.237
+-fsplit-paths 3.213
+-ftree-loop-distribution 3.213
+-ftree-partial-pre 3.210
+-funswitch-loops 3.207
+-fvect-cost-model=dynamic 3.187
+-fversion-loops-for-strides 3.217

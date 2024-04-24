@@ -1,0 +1,15 @@
+opt ssca2
+none 4.943
+-fgcse-after-reload 4.937
+-fipa-cp-clone 4.893
+-floop-interchange 4.863
+-floop-unroll-and-jam 4.867
+-fpeel-loops 4.927
+-fpredictive-commoning 4.890
+-fsplit-loops 4.890
+-fsplit-paths 4.883
+-ftree-loop-distribution 4.817
+-ftree-partial-pre 4.813
+-funswitch-loops 4.947
+-fvect-cost-model=dynamic 4.907
+-fversion-loops-for-strides 4.850
