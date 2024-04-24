@@ -40,6 +40,6 @@ for prog in "${progs[@]}"; do
     prog_args=($prog)
     outdir=results/${prog_args[0]}
     mkdir -p "$outdir"
-    ./benchmark.sh -n10 -o "$outdir"/"$TESTFLAG".json -- \
+    ./benchmark.sh -n 10 -o "$outdir"/"$TESTFLAG".json -- \
         test_cases/"build_$TESTFLAG"/$prog
 done

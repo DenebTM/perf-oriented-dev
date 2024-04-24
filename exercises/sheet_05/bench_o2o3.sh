@@ -27,7 +27,7 @@ for opt in "${opts[@]}"; do
     sbatch "$tmp_jobdir/$opt.sh"
 done
 
-echo "Waiting for jobs"
+echo -n "Waiting for jobs"
 while squeue -u $USER | grep -v JOBID >/dev/null; do
     sleep 1
     echo -n .
