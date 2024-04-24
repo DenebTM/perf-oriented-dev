@@ -25,7 +25,7 @@ module load cmake/3.24.3-gcc-8.5.0-svdlhox
 cd $basedir/exercises/sheet_05
 (
     cd test_cases
-    mkdir -- "build_$TESTFLAG" && cd -- "build_$TESTFLAG"
+    mkdir -p -- "build_$TESTFLAG" && cd -- "build_$TESTFLAG"
     cmake -DCMAKE_C_FLAGS="-O2 $TESTFLAG" ..
     make -j$(nproc)
 )
