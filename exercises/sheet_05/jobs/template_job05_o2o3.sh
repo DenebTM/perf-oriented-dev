@@ -40,6 +40,10 @@ progs=(
 )
 
 for prog in "${progs[@]}"; do
+    outfilename="$TESTFLAG.json"
+    if [ "$outfilename" == ".json" ]; then
+        outfilename="none.json"
+    fi
     prog_args=($prog)
     outdir=results/${prog_args[0]}
     mkdir -p "$outdir"
