@@ -31,8 +31,9 @@ levels=("-O0" "-O1" "-O2" "-O3" "-Os" "-Ofast")
         for prog in "${progs[@]}"; do (
             prog_args=($prog)
             
-            mkdir -p "$workdir/results/$prog_args"
-            "$bench" -n 10 -o "$workdir/results/$prog_args/$level.json" -- ./${prog_args[*]}
+            results_dir="$workdir/results/$prog_args"
+            mkdir -p "$results_dir"
+            "$bench" -n 10 -o "$results_dir/$level.json" -- ./${prog_args[*]}
         ); done
     ); done
 )

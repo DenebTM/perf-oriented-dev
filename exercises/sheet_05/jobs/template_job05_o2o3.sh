@@ -45,8 +45,8 @@ for prog in "${progs[@]}"; do
         outfilename="none.json"
     fi
     prog_args=($prog)
-    outdir=results/${prog_args[0]}
+    results_dir=results_o2o3/${prog_args[0]}
     mkdir -p "$outdir"
-    ./benchmark.sh -n 10 -o "$outdir"/"$outfilename" -- \
+    ./benchmark.sh -n 10 -o "$results_dir"/"$outfilename" -- \
         test_cases/"build_$TESTFLAG"/$prog
 done
