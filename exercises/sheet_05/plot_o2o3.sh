@@ -34,6 +34,7 @@ for prog in delannoy mmul nbody npb_bt_w qap ssca2; do (
         set key autotitle columnhead noenhanced
         set style data histograms
         set style fill solid 1.0 border lt -1
+        set lmargin 11.0
 
         set xtics rotate by 45 right nomirror
 

@@ -24,6 +24,7 @@ for metric in wall user system mem; do (
         set style fill solid 1.0 border lt -1
         
         set yrange [0:*]
+        set xtics nomirror
         
         plot "plot.dat" using 2:xtic(1) linecolor 1, \
         "" using 3:xtic(1) linecolor 2, \
