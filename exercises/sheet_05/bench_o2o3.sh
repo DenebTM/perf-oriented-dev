@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-bench="./benchmark.sh"
-
-run_benchmark() {
-    
-}
-
 opts=(
     "-fgcse-after-reload"
     "-fipa-cp-clone"
