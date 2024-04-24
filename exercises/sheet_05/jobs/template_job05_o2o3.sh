@@ -14,6 +14,8 @@
 #SBATCH --ntasks-per-node=1
 # Enforce exclusive node allocation, do not share with other jobs
 #SBATCH --exclusive
+# More than 1 core
+#SBATCH --cpus-per-tasks=8
 
 basedir=/scratch/cb761236/perf-oriented-dev
 
@@ -25,6 +27,7 @@ cd $basedir/exercises/sheet_05
     cd test_cases
     mkdir -- "build_$TESTFLAG" && cd -- "build_$TESTFLAG"
     cmake -DCMAKE_C_FLAGS="-O2 $TESTFLAG" ..
+    make -j$(nproc)
 )
 
 progs=(
