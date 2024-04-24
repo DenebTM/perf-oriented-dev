@@ -5,30 +5,36 @@ set -e
 results_dir="$1"
 cd "$results_dir"
 
-( for file in *.json; do
-    level="${file%%.json}"
-    cat -- "$file" | jq -r "[\"$level\", .mean[]] | join(\" \")"
-done ) > plot.dat
+for metric in wall user system mem; do (
+    # print header
+    echo -n "level "; for prog in */; do echo -n "${prog%%/} "; done; echo
+    for level in -O0 -O1 -O2 -O3 -Ofast -Os; do
+        echo -n "$level "
+        for prog in */; do
+            echo -n "$(cat -- "$prog/$level.json" | jq -r ".mean.$metric") "
+        done
+        echo
+    done ) > plot.dat
+    
+    gnuplot <<"    EOF"
+        set terminal pdf
+        set output "plot.pdf"
+        set key outside autotitle columnhead noenhanced
+        set style data histograms
+        set style fill solid 1.0 border lt -1
+        
+        set yrange [0:*]
+        
+        plot "plot.dat" using 2:xtic(1) linecolor 1, \
+        "" using 3:xtic(1) linecolor 2, \
+        "" using 4:xtic(1) linecolor 3, \
+        "" using 5:xtic(1) linecolor 4, \
+        "" using 6:xtic(1) linecolor 5, \
+        "" using 7:xtic(1) linecolor 6
+    EOF
 
-gnuplot <<EOF
-set terminal png size 852,480
-set output "plot.png"
-set key outside
-set style data histograms
-set style fill solid 1.0 border lt -1
+    mv plot.pdf plot_$metric.pdf
+    mv plot.dat plot_$metric.dat
+    echo "Saved plot to $results_dir/plot_$metric.pdf"
 
-set xtics nomirror
-set xtics format " "
-set y2range [0:*]
-set y2tics
-set ytics nomirror
-
-plot "plot.dat" using 2:xtic(1) linecolor 1 title "wall", \
-    "" using 3:xtic(1) linecolor 2 title "user", \
-    "" using 4:xtic(1) linecolor 3 title "sys", \
-    "" using 5:xtic(1) linecolor 4 title "mem" axes x1y2
-EOF
-
-rm plot.dat
-
-echo "Saved plot to $results_dir/plot.png"
+done
