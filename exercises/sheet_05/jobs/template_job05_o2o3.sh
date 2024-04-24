@@ -15,7 +15,7 @@
 # Enforce exclusive node allocation, do not share with other jobs
 #SBATCH --exclusive
 # More than 1 core
-#SBATCH --cpus-per-tasks=8
+#SBATCH --cpus-per-task=8
 
 basedir=/scratch/cb761236/perf-oriented-dev
 
