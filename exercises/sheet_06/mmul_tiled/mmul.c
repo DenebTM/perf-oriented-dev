@@ -12,9 +12,6 @@
 #ifndef TI
 #define TI 32
 #endif
-#ifndef TJ
-#define TJ TI
-#endif
 #ifndef TK
 #define TK 4
 #endif
@@ -69,21 +66,10 @@ int main(void) {
   for (int i0 = 0; i0 < N; i0 += TI) {
     int imax = i0 + TI;
 
-    for (int i = i0; i < imax; i++) {
+    for (int k0 = 0; k0 < M; k0 += TK) {
+      int kmax = k0 + TK;
 
-      // first iteration of k=0-M loop
-      for (int j = 0; j < K; j++) {
-        TYPE sum = 0;
-
-        for (int k = 0; k < TK; k++) {
-          sum += A[i][k] * B[k][j];
-        }
-
-        C[i][j] = sum;
-      }
-
-      for (int k0 = TK; k0 < M; k0 += TK) {
-        int kmax = k0 + TK;
+      for (int i = i0; i < imax; i++) {
 
         for (int j = 0; j < K; j++) {
           TYPE sum = 0;
@@ -92,7 +78,10 @@ int main(void) {
             sum += A[i][k] * B[k][j];
           }
 
-          C[i][j] += sum;
+          if (k0 == 0)
+            C[i][j] = sum;
+          else
+            C[i][j] += sum;
         }
       }
     }
