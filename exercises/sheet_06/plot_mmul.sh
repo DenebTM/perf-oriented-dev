@@ -43,4 +43,3 @@ gnuplot <<EOF
 EOF
 
 echo "Saved plot to plot_mmul.pdf"
-

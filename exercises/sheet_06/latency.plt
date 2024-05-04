@@ -1,7 +1,5 @@
-set yrange [0:*]
-set xrange [1024:*]
+set xrange [512:*]
 set logscale x 2
-
 set xtics 1024,2 \
   add ( \
     "128k" 2**17, \
@@ -20,14 +18,16 @@ set xtics 1024,2 \
   rotate by 45 right nomirror
 set mxtics 8
 
-set ytics 5 nomirror
-set mytics 5
-
-set terminal pdf
-set output "latency.pdf"
+set yrange [0.5:*]
+set logscale y 10
+set ytics 1,10 nomirror
+set mytics 10
 
 set xlabel "Block size"
 set ylabel "Latency [ns]"
 set grid
 
-plot 'latency.dat' using 1:2 with lines notitle
+set terminal pdf
+
+# set output "latency.pdf"
+# plot 'latency.dat' using 1:2 with lines notitle
