@@ -1,6 +1,6 @@
-set xrange [512:*]
+set xrange [512:2**26+1]
 set logscale x 2
-set xtics 1024,2 \
+set xtics 512,2 \
   add ( \
     "128k" 2**17, \
     "256k" 2**18, \
@@ -11,9 +11,7 @@ set xtics 1024,2 \
     "8M" 2**23, \
     "16M" 2**24, \
     "32M" 2**25, \
-    "64M" 2**26, \
-    "128M" 2**27, \
-    "256M" 2**28 \
+    "64M" 2**26 \
   ) \
   rotate by 45 right nomirror
 set mxtics 8

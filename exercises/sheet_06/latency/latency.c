@@ -18,11 +18,11 @@
                     RPT_10(a);RPT_10(a);RPT_10(a);RPT_10(a);RPT_10(a)
 // clang-format on
 
+// source: https://stackoverflow.com/a/10072899
 void shuffle(int *array, size_t n) {
   if (n > 1) {
-    size_t i;
-    for (i = n - 1; i > 0; i--) {
-      size_t j = (unsigned int)(drand48() * (i + 1));
+    for (size_t i = n - 1; i > 0; i--) {
+      size_t j = (size_t)(drand48() * (i + 1));
       int t = array[j];
       array[j] = array[i];
       array[i] = t;
@@ -32,75 +32,38 @@ void shuffle(int *array, size_t n) {
 
 struct node {
   struct node *next;
-  bool used;
 
   // pad to cacheline size
-  char padding[64 - sizeof(struct node *) - sizeof(bool)];
+  char padding[64 - sizeof(struct node *)];
 };
 
 long long nodes_count;
 struct node *nodes;
-long long nextnode_offset = 0;
-
-/**
- * create a new node at a random offset in the `nodes` array
- */
-struct node *create_node() {
-
-  // find next free node to the right if this one is already used
-  for (int attempts = 0; nodes[nextnode_offset].used; attempts++) {
-    if (attempts > nodes_count) {
-      return NULL;
-    }
-    nextnode_offset = (nextnode_offset + 1) % nodes_count;
-  }
-
-  // mark this node as in-use
-  struct node *ptr = nodes + nextnode_offset;
-  ptr->used = true;
-
-  // calculate the offset to be used for the next block
-  long long next_offset = rand() % nodes_count;
-
-  // return allocated node
-  nextnode_offset = next_offset;
-  return ptr;
-}
 
 /**
  * allocate space for `count` instances of `struct node`,
- * reset initial offset to 0
+ * then link them in a random order
  */
 struct node *nodes_init(long long count) {
 
   nodes_count = count;
   nodes = calloc(nodes_count, sizeof(struct node));
 
-  nextnode_offset = 0;
-
-  int *indices = malloc(count * sizeof(int));
+  static int indices[BS_MAX / sizeof(struct node)];
   indices[count - 1] = 0;
   for (int i = 0; i < count - 1; i++) {
     indices[i] = i + 1;
   }
   shuffle(indices, count - 1);
 
-  struct node *start = create_node();
+  struct node *start = nodes;
 
   struct node *node = start;
-  for (int i = 0; i < INDIRECTION_COUNT; i++) {
-
-    // all available nodes allocated
-    if (i + 1 >= count) {
-      node->next = start;
-      break;
-    } else {
-      node->next = nodes + indices[i];
-      node = node->next;
-    }
+  for (int i = 0; i < INDIRECTION_COUNT && i < count; i++) {
+    node->next = nodes + indices[i];
+    node = node->next;
   }
 
-  free(indices);
   return start;
 }
 
