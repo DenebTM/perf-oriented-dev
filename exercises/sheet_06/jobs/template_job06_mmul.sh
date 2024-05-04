@@ -26,7 +26,7 @@ cd "$basedir"/exercises/sheet_06
     gcc -o "$exe_name" ${GCC_FLAGS} -DTI=${TI} -DTK=${TK} mmul.c
 )
 
-results_dir="results_mmul/"
+results_dir="mmul_tiled/results/"
 results_filename="TI=${TI}_TK=${TK}.json"
 
 mkdir -p "$results_dir"

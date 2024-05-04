@@ -21,7 +21,7 @@ set logscale y 10
 set ytics 1,10 nomirror
 set mytics 10
 
-set xlabel "Block size"
+set xlabel "Block size" offset 0,2
 set ylabel "Memory latency [ns]"
 set grid
 
