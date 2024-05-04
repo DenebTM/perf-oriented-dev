@@ -22,7 +22,7 @@ set ytics 1,10 nomirror
 set mytics 10
 
 set xlabel "Block size"
-set ylabel "Latency [ns]"
+set ylabel "Memory latency [ns]"
 set grid
 
 set terminal pdf
