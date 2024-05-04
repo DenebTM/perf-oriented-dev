@@ -27,5 +27,5 @@ cd "$basedir"/exercises/sheet_06
 )
 
 results_filename="latency_LCC3.dat"
-latency/"$exe_name" > /tmp/"$results_filename"
+latency/"$exe_name" | tee /tmp/"$results_filename"
 mv /tmp/"$results_filename" .
