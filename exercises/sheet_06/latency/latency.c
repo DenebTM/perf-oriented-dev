@@ -1,7 +1,6 @@
 #pragma GCC optimize("unroll-loops")
 
 #include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,7 +32,7 @@ void shuffle(int *array, size_t n) {
 struct node {
   struct node *next;
 
-  // pad to cacheline size
+  // pad to cacheline length
   char padding[64 - sizeof(struct node *)];
 };
 
@@ -44,14 +43,14 @@ struct node *nodes;
  * allocate space for `count` instances of `struct node`,
  * then link them in a random order
  */
-struct node *nodes_init(long long count) {
+struct node *nodes_init(size_t count) {
 
   nodes_count = count;
   nodes = calloc(nodes_count, sizeof(struct node));
 
   static int indices[BS_MAX / sizeof(struct node)];
   indices[count - 1] = 0;
-  for (int i = 0; i < count - 1; i++) {
+  for (size_t i = 0; i < count - 1; i++) {
     indices[i] = i + 1;
   }
   shuffle(indices, count - 1);
@@ -59,7 +58,7 @@ struct node *nodes_init(long long count) {
   struct node *start = nodes;
 
   struct node *node = start;
-  for (int i = 0; i < INDIRECTION_COUNT && i < count; i++) {
+  for (size_t i = 0; i < INDIRECTION_COUNT && i < count; i++) {
     node->next = nodes + indices[i];
     node = node->next;
   }
@@ -86,19 +85,19 @@ void follow_chain(struct node *start) {
   }
 }
 
-int main(int argc, char **argv) {
+int main() {
   char *src = malloc(sizeof(char) * BS_MAX);
 
-  // at each block size increment of 2
-  for (uint64_t block_size_base = BS_MIN; block_size_base <= BS_MAX;
+  // for each block size range n <= B < 2*n ...
+  for (size_t block_size_base = BS_MIN; block_size_base <= BS_MAX;
        block_size_base *= 2) {
 
     int block_size_incr = block_size_base / 64 < sizeof(struct node)
                               ? sizeof(struct node)
                               : block_size_base / 64;
 
-    // ...
-    for (uint64_t block_size = block_size_base;
+    // ... test 64 equally spaced block sizes
+    for (size_t block_size = block_size_base;
          block_size < 2 * block_size_base && block_size <= BS_MAX;
          block_size += block_size_incr) {
 
@@ -118,7 +117,7 @@ int main(int argc, char **argv) {
         struct timespec tv_end;
         clock_gettime(CLOCK_REALTIME, &tv_end);
 
-        int64_t sample_time = tv_end.tv_nsec - tv_start.tv_nsec;
+        __suseconds_t sample_time = tv_end.tv_nsec - tv_start.tv_nsec;
         if (sample_time < 0) {
           sample_time += 1000000000;
         }
