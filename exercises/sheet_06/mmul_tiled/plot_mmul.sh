@@ -41,7 +41,7 @@ gnuplot mmul.plt -e "
         to $TI_min_wall,$TK_min_wall,$wall_max
         front nohead lc rgb 'red';
     
-    set label 1 \"min: $wall_min\" at $TI_min_wall,$TK_min_wall,$wall_max front tc rgb 'red' center offset 0,0.5;
+    set label 'min: $wall_min' at $TI_min_wall,$TK_min_wall,$wall_max front tc rgb 'red' center offset 0,0.5;
 
     set output '$data_file_base.pdf';
     splot '$data_file' with pm3d;
