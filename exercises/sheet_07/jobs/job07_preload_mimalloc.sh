@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# gcc flags: -O3 -march=native
-
 # Execute job in the partition "lva" unless you have special requirements.
 #SBATCH --partition=lva
 # Name your job to be able to identify it later
@@ -35,7 +33,7 @@ fi
     cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..
     ninja
 )
-export LD_PRELOAD="$basedir/preload/mimalloc/build/libmimalloc.so"
+_ld_preload="$basedir/preload/mimalloc/build/libmimalloc.so"
 
 # prepare allscale_api source
 if [ ! -d allscale_api ]; then
@@ -47,4 +45,5 @@ cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../code
 
 # run compile benchmark
 results_filename="$basedir/preload/mimalloc.json"
-"$bench" -o "$results_filename" -n 5 -- bash -c "ninja clean; ninja"
+"$bench" -o "$results_filename" -n 5 -- \
+    bash -c "ninja clean; LD_PRELOAD=$_ld_preload ninja"
