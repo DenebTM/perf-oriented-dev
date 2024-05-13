@@ -46,5 +46,5 @@ cd allscale_api/build_preload_rpmalloc
 cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../code
 
 # run compile benchmark
-results_filename="$basedir/rpmalloc.json"
+results_filename="$basedir/preload/rpmalloc.json"
 "$bench" -o "$results_filename" -n 5 -- bash -c "ninja clean; ninja"

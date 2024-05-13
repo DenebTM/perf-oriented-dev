@@ -46,5 +46,5 @@ cd allscale_api/build_preload_mimalloc
 cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../code
 
 # run compile benchmark
-results_filename="$basedir/mimalloc.json"
+results_filename="$basedir/preload/mimalloc.json"
 "$bench" -o "$results_filename" -n 5 -- bash -c "ninja clean; ninja"
