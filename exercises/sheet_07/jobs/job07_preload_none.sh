@@ -18,7 +18,7 @@ bench="$basedir/benchmark.sh"
 
 set -e
 
-module load $(module avail -t | grep -E '^(cmake|ninja|llvm)')
+module load cmake ninja llvm
 mkdir -p "$basedir/preload"
 cd "$basedir/preload"
 

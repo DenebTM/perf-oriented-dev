@@ -14,31 +14,32 @@
 #SBATCH --exclusive
 
 basedir="/scratch/cb761236/perf-oriented-dev"
+bumpmalloc_dir="$basedir/exercises/sheet_07/bumpmalloc"
 bench="$basedir/exercises/sheet_07/benchmark.sh"
 
 set -e
 
-module load $(module avail -t | grep -E '^llvm')
-cd "$basedir/exercises/sheet_07/bumpmalloc"
+module load llvm
+cd "$bumpmalloc_dir"
 
 # prepare bumpmalloc
 if [ ! -f bumpmalloc.so ]; then
   make bumpmalloc.so
 fi
-_ld_preload="$PWD/bumpmalloc.so"
+_ld_preload="$bumpmalloc_dir/bumpmalloc.so"
 
 # prepare malloctest
 (
     cd "$basedir/tools/malloctest"
     if [ ! -f malloctest ]; then
-        clang -o malloctest -O3 -march=native malloctest.c 
+        clang -o malloctest -O3 -march=native malloctest.c -lpthread
     fi
 )
 
 exe="$basedir/tools/malloctest/malloctest"
 
 # run malloctest benchmark
-results_filename="$basedir/bumpmalloc/malloctest_bumpmalloc.json"
+results_filename="$bumpmalloc_dir/malloctest_bumpmalloc.json"
 "$bench" -o "$results_filename" -n 5 -- \
     env LD_PRELOAD="$_ld_preload" \
     "$exe" 1 500 1000000 10 1000

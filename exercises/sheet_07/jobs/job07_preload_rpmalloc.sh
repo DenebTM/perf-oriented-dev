@@ -18,7 +18,7 @@ bench="$basedir/benchmark.sh"
 
 set -e
 
-module load $(module avail -t | grep -E '^(cmake|ninja|llvm)')
+module load cmake ninja llvm
 mkdir -p "$basedir/preload"
 cd "$basedir/preload"
 
@@ -28,7 +28,7 @@ if [ ! -d rpmalloc ]; then
 fi
 (
     cd rpmalloc
-    module load $(module avail -t | grep '^python/3.10')
+    module load python
     ./configure.py
     sed -i 's/-W /-W -Wno-unknown-warning-option/g' build.ninja
     ninja
