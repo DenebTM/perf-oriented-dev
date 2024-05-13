@@ -35,5 +35,5 @@ cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../code
 
 # run compile benchmark
 results_filename="$basedir/preload/none.json"
-"$bench" -o "$results_filename" -n 5 -- \
-    bash -c "ninja clean; LD_PRELOAD=$_ld_preload ninja"
+"$bench" -o "$results_filename" -n 5 -p "ninja clean" -- \
+    env LD_PRELOAD=$_ld_preload ninja

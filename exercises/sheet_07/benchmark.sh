@@ -52,6 +52,7 @@ arg_nruns=0
 arg_error=0.05
 arg_quiet=false
 arg_jsonout=
+arg_prepare=
 
 # parse command-line arguments
 while [[ $# -gt 0 ]]; do
@@ -84,6 +85,10 @@ while [[ $# -gt 0 ]]; do
             shift
             arg_jsonout=$1
             ;;
+        -p|--prepare)
+            shift
+            arg_prepare=$1
+            ;;
         --)
             shift
             break
@@ -92,18 +97,22 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [OPTIONS] COMMAND"
             echo -e "\nAvailable options:"
             echo "\
-  -q, --quiet         suppress output of benchmarked command"
+  -q, --quiet           suppress output of benchmarked command"
             echo "\
-  -n, --nruns NRUNS   perform NRUNS benchmark passes
-                      if 0, re-run until wall time within margin of error
-                      (default 0)"
+  -n, --nruns NRUNS     perform NRUNS benchmark passes
+                        if 0, re-run until wall time within margin of error
+                        (default 0)"
             echo "\
-  -e, --error MARGIN  re-run until statistical error smaller than MARGIN
-                      if NRUNS is also specified, it serves as an upper bound
-                      for the number of benchmark passes
-                      (default 0.05)"
+  -e, --error MARGIN    re-run until statistical error smaller than MARGIN
+                        if NRUNS is also specified, it serves as an upper bound
+                        for the number of benchmark passes
+                        (default 0.05)"
             echo "\
-  -o, --output FILE   write JSON benchmark results to file instead of stdout"
+  -o, --output FILE     write JSON benchmark results to file instead of stdout"
+            exit 0
+            echo "\
+  -p, --prepare COMMAND run a command before each benchmark pass
+                        (name and arguments cannot contain spaces)"
             exit 0
             ;;
         -*)
@@ -134,6 +143,11 @@ run=0
 while (( $(echo "$stat_error > $arg_error" | bc -l) )); do
     run=$((run + 1))
     >&2 echo "Run $run"
+
+    if [[ ! -z "$arg_prepare" ]]; then
+        >&2 echo "Preparing with '$arg_prepare'"
+        $arg_prepare
+    fi
 
     if [[ $arg_quiet == true ]]; then
         $time_cmd -f '%e %U %S %M' -o $time_output -q "$@" >/dev/null 2>&1
