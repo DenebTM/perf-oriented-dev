@@ -28,11 +28,13 @@ cd "$basedir/preload"
 if [ ! -d mimalloc ]; then
     git clone https://github.com/microsoft/mimalloc.git
 fi
-cd mimalloc
-mkdir -p build
-cd build
-cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..
-ninja
+(
+    cd mimalloc
+    mkdir -p build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+    ninja
+)
 export LD_PRELOAD="$basedir/preload/mimalloc/build/libmimalloc.so"
 
 # prepare allscale_api source

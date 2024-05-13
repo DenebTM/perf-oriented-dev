@@ -28,11 +28,13 @@ cd "$basedir/preload"
 if [ ! -d rpmalloc ]; then
     git clone https://github.com/mjansson/rpmalloc.git
 fi
-cd rpmalloc
-module load $(module avail -t | grep '^python/3.10')
-./configure.py
-sed -i 's/-W /-W -Wno-unknown-warning-option/g' build.ninja
-ninja
+(
+    cd rpmalloc
+    module load $(module avail -t | grep '^python/3.10')
+    ./configure.py
+    sed -i 's/-W /-W -Wno-unknown-warning-option/g' build.ninja
+    ninja
+)
 export LD_PRELOAD="$basedir/preload/rpmalloc/bin/linux/release/x86-64/librpmalloc.so"
 
 # prepare allscale_api source
