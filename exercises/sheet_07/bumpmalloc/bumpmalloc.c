@@ -12,19 +12,19 @@
 #endif
 
 char arena[ARENA_SIZE];
-size_t offset = 0;
+size_t arena_ptr = 0;
 
 void *malloc(size_t size) {
   if (size > ARENA_SIZE) {
     return NULL;
   }
 
-  if (ARENA_SIZE - offset < size) {
-    offset = 0;
+  if (ARENA_SIZE - arena_ptr < size) {
+    arena_ptr = 0;
   }
 
-  void *ptr = arena + offset;
-  offset += size;
+  void *ptr = arena + arena_ptr;
+  arena_ptr += size;
 
   return ptr;
 }
