@@ -29,7 +29,7 @@ cd "$basedir"
     module load gcc
     tar xvf "$scratchdir/lua-5.4.6.tar.gz"
     cd lua-5.4.6/
-    sed -i 's/MYCFLAGS=/MYCFLAGS= $TESTFLAG' src/Makefile
+    sed -i 's/MYCFLAGS=/MYCFLAGS= $TESTFLAG/' src/Makefile
     make -j$(nproc)
     cp src/lua "$basedir"
 )
