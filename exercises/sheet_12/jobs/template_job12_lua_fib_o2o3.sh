@@ -15,28 +15,30 @@
 # Enforce exclusive node allocation, do not share with other jobs
 #SBATCH --exclusive
 
-basedir="/scratch/${USER}/sheet12_lua_$TESTFLAG"
+scratchdir="/scratch/${USER}"
+basedir="$scratchdir/sheet12_lua_$TESTFLAG"
 nruns=10
+
+cd "$scratchdir"
+[ ! -f lua-5.4.6.tar.gz ] && wget -c https://www.lua.org/ftp/lua-5.4.6.tar.gz
+[ ! -f fib.lua ] && wget -c https://raw.githubusercontent.com/PeterTh/perf-oriented-dev/master/lua/fib.lua
 
 mkdir -p "$basedir"
 cd "$basedir"
-
 (
     module load gcc
-    [ ! -f lua-5.4.6.tar.gz ] && wget -c https://www.lua.org/ftp/lua-5.4.6.tar.gz
-    tar xvf lua-5.4.6.tar.gz
+    tar xvf "$scratchdir/lua-5.4.6.tar.gz"
     cd lua-5.4.6/
     sed -i 's/MYCFLAGS=/MYCFLAGS= $TESTFLAG' src/Makefile
     make -j$(nproc)
     cp src/lua "$basedir"
 )
 
-[ ! -f fib.lua ] && wget -c https://raw.githubusercontent.com/PeterTh/perf-oriented-dev/master/lua/fib.lua
 (
     echo 'func,time'
     for run in $(seq 1 $nruns); do
         >&2 echo "Run $run of $nruns"
-        ./lua fib.lua | awk '{ print $3 "," $5 }'
+        ./lua "$scratchdir/fib.lua" | awk '{ print $3 "," $5 }'
     done
 ) > results_raw.csv
 
