@@ -3,9 +3,9 @@
 # Execute job in the partition "lva" unless you have special requirements.
 #SBATCH --partition=lva
 # Name your job to be able to identify it later
-#SBATCH --job-name sheet12_lua_jumptable
+#SBATCH --job-name sheet12_lua_nojumptable
 # Redirect output stream to this file
-#SBATCH --output=output12_lua_jumptable.log
+#SBATCH --output=output12_lua_nojumptable.log
 # Maximum number of tasks (=processes) to start in total
 #SBATCH --ntasks=1
 # Maximum number of tasks (=processes) to start per node
@@ -16,7 +16,7 @@
 set -e
 
 scratchdir="/scratch/${USER}"
-basedir="$scratchdir/sheet12_lua_jumptable_$$"
+basedir="$scratchdir/sheet12_lua_nojumptable_$$"
 nruns=10
 
 cd "$scratchdir"
@@ -30,7 +30,7 @@ cd "$basedir"
     module load gcc
     tar xvf "$scratchdir/lua-5.4.6.tar.gz"
     cd lua-5.4.6/
-    sed -i 's/MYCFLAGS=/MYCFLAGS= -DLUA_USE_JUMPTABLE=1/' src/Makefile
+    sed -i 's/MYCFLAGS=/MYCFLAGS= -DLUA_USE_JUMPTABLE=0/' src/Makefile
     make -j$(nproc)
     cp src/lua "$basedir"
 )
