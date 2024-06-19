@@ -2,7 +2,7 @@
 title: "Exercise Sheet 12"
 subtitle: "VU Performance-oriented Computing, Summer Semester 2024"
 author: Calvin Hoy, Luca Rahm, Jannis Voigt
-date: 2024-06-18
+date: 2024-06-19
 geometry: margin=2.5cm
 papersize: a4
 header-includes:
@@ -29,11 +29,12 @@ comment: PDF created using pandoc
 
 Benchmark results with default Lua interpreter compilation (-O2):
 
-| test  | wall (mean) | wall (stddev) |
-| ----- | ----------- | ------------- |
-| naive | 12.5483     | 0.322         |
-| tail  | 12.5980     | 0.046         |
-| iter  | 10.8730     | 0.036         |
+| test      | wall (mean) | wall (stddev) |
+| --------- | ----------- | ------------- |
+| naive     | 12.5483     | 0.322         |
+| tail      | 12.5980     | 0.046         |
+| iter      | 10.8730     | 0.036         |
+| **total** | **36.0913**     |               |
 
 # B) Profiling
 
@@ -434,36 +435,59 @@ can improve the perfomance.
 ### Mimalloc Setup
 
 First we build mimalloc from source, as described in the repository. After that
-we added the Flag `-lmimalloc` during the build of the interpreter to use it for
-all the allocations.
+we load the shared library for the `lua` executable using the `LD_PRELOAD`
+environment variable.
 
 ### Mimalloc Results
 
-Unfortunately mimalloc couldn't really speed up the execution times for this
-scenario.
+Unfortunately using mimalloc significantly reduced the performance for our benchmark.
 
-The baseline results were (mean of 10 runs):
+The results were (mean of 10 runs):
 
-| test  | wall (mean) |
-| ----- | ----------- |
-| naive | 12.7706     |
-| tail  | 12.6074     |
-| iter  | 10.8779     |
+|       | wall (mean) | wall (stddev) |
+| ----- | ----------- | ------------- |
+| naive | 14.7329     | 0.405         |
+| tail  | 12.3188     | 0.078         |
+| iter  | 11.8141     | 0.806         |
 
-And with mimalloc:
+baseline results:
 
-| test  | wall (mean) |
-| ----- | ----------- |
-| naive | 12.5884     |
-| tail  | 12.6433     |
-| iter  | 10.9223     |
+| test  | wall (mean) | wall (stddev) |
+| ----- | ----------- | ------------- |
+| naive | 12.5483     | 0.322         |
+| tail  | 12.5980     | 0.046         |
+| iter  | 10.8730     | 0.036         |
 
-We can see that the "improvements" fall within a margin of error. Our possible
-explanations for that were:
+We can see that there is a big performance loss for the naive approach (~ 2 sec). For the tail approach there is small improvement. For the iter result we see a performance loss of roughly 1 second, however the standard deviation is also almost 1 second. Mimalloc doesn't seem to be stable for the latter approach.
+
+Our possible explanations are:
 
 1. The program probably is rather compute bound and not so heavy on the memory.
 
 2. Maybe Lua already uses a non-default memory allocator / they have their own
-   implementation. A look in the source code, we can see the file `lmem.c` which
+   implementation. From a look in the source code, we can see the file `lmem.c` which
    contains the implementation of Lua's memory handling. Of course this is
    completed by the garbage collector in seperate files.
+
+## Combining multiple "optimizations"
+
+We combined
+
+- `-fsplit-paths`
+- Inlining
+- Reordering
+
+and achieved the following results (mean of 10 runs):
+
+| test      | wall (mean) |
+| --------- | ----------- |
+| naive     | 12.4805     |
+| tail      | 12.417      |
+| iter      | 11.1622     |
+| **total** | **36.0597** |
+
+Although a slight improvement was achieved for `naive` and `tail`, it is again
+outweighed by the deficit in `iter`.
+
+The total time is improved by 0.0316 seconds versus the baseline, or 0.09\%.
+This is almost certainly within error.
