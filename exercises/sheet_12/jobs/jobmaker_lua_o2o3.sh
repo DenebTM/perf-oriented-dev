@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Run this script on the head node, don't sbatch it!
+
 opts=(
     "-fgcse-after-reload"
     "-fipa-cp-clone"
@@ -21,7 +23,7 @@ tmp_jobdir="/tmp/${USER}_jobs_o2o3"
 mkdir -p "$tmp_jobdir"
 for opt in "${opts[@]}"; do
     export TESTFLAG="$opt"
-    envsubst '$TESTFLAG' < jobs/template_job12_lua_fib_o2o3.sh > "$tmp_jobdir/$opt.sh"
+    envsubst '$TESTFLAG' < template_lua_o2o3.sh > "$tmp_jobdir/$opt.sh"
 
     sbatch "$tmp_jobdir/$opt.sh"
 done

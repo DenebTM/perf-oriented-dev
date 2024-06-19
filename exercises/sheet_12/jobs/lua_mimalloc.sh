@@ -3,9 +3,9 @@
 # Execute job in the partition "lva" unless you have special requirements.
 #SBATCH --partition=lva
 # Name your job to be able to identify it later
-#SBATCH --job-name sheet12_lua_stock
+#SBATCH --job-name sheet12_lua_mimalloc_final
 # Redirect output stream to this file
-#SBATCH --output=output12_lua_stock.log
+#SBATCH --output=output12_lua_mimalloc_final.log
 # Maximum number of tasks (=processes) to start in total
 #SBATCH --ntasks=1
 # Maximum number of tasks (=processes) to start per node
@@ -15,17 +15,28 @@
 
 set -e
 
-basedir="/scratch/${USER}/sheet12_lua_stock_$$"
+basedir="/scratch/${USER}/sheet12_lua_mimalloc$$"
 nruns=10
 
 mkdir -p "$basedir"
 cd "$basedir"
 
 (
+	module load gcc
+	git clone https://github.com/microsoft/mimalloc
+	cd mimalloc
+	mkdir -p out/release
+	cd out/release
+	cmake ../..
+	make
+)
+
+(
     module load gcc
     [ ! -f lua-5.4.6.tar.gz ] && wget -c https://www.lua.org/ftp/lua-5.4.6.tar.gz
     tar xvf lua-5.4.6.tar.gz
-    cd lua-5.4.6/
+    sed -i 's/MYCFLAGS=/MYCFLAGS= -lmimalloc/' lua-5.4.6/src/Makefile
+    cd lua-5.4.6/ 
     make -j$(nproc)
     cp src/lua "$basedir"
 )
@@ -48,3 +59,4 @@ echo -e "\nResults (see results.csv):"
         awk -F ',' "\$1 == \"$func\" { nr++; total += \$2 } END { print \"$func\" \",\" total/nr }" results_raw.csv
     done
 ) | tee results.csv
+

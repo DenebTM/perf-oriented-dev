@@ -1,13 +1,11 @@
 #!/bin/bash
 
-# gcc flags: -O2 $TESTFLAG
-
 # Execute job in the partition "lva" unless you have special requirements.
 #SBATCH --partition=lva
 # Name your job to be able to identify it later
-#SBATCH --job-name sheet12_lua_$TESTFLAG
+#SBATCH --job-name sheet12_lua_-O3
 # Redirect output stream to this file
-#SBATCH --output=output12_lua_$TESTFLAG.log
+#SBATCH --output=output12_lua_-O3.log
 # Maximum number of tasks (=processes) to start in total
 #SBATCH --ntasks=1
 # Maximum number of tasks (=processes) to start per node
@@ -15,8 +13,10 @@
 # Enforce exclusive node allocation, do not share with other jobs
 #SBATCH --exclusive
 
+set -e
+
 scratchdir="/scratch/${USER}"
-basedir="$scratchdir/sheet12_lua_$TESTFLAG"
+basedir="$scratchdir/sheet12_lua_-O3_$$"
 nruns=10
 
 cd "$scratchdir"
@@ -25,11 +25,12 @@ cd "$scratchdir"
 
 mkdir -p "$basedir"
 cd "$basedir"
+
 (
     module load gcc
     tar xvf "$scratchdir/lua-5.4.6.tar.gz"
     cd lua-5.4.6/
-    sed -i 's/MYCFLAGS=/MYCFLAGS= $TESTFLAG/' src/Makefile
+    sed -i 's/CFLAGS= -O2/CFLAGS= -O3/' src/Makefile
     make -j$(nproc)
     cp src/lua "$basedir"
 )

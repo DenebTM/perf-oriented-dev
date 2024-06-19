@@ -3,9 +3,9 @@
 # Execute job in the partition "lva" unless you have special requirements.
 #SBATCH --partition=lva
 # Name your job to be able to identify it later
-#SBATCH --job-name sheet12_lua_-Ofast
+#SBATCH --job-name sheet12_lua_stock
 # Redirect output stream to this file
-#SBATCH --output=output12_lua_-Ofast.log
+#SBATCH --output=output12_lua_stock.log
 # Maximum number of tasks (=processes) to start in total
 #SBATCH --ntasks=1
 # Maximum number of tasks (=processes) to start per node
@@ -16,7 +16,7 @@
 set -e
 
 scratchdir="/scratch/${USER}"
-basedir="$scratchdir/sheet12_lua_Ofast_$$"
+basedir="$scratchdir/sheet12_lua_stock_$$"
 nruns=10
 
 cd "$scratchdir"
@@ -30,7 +30,6 @@ cd "$basedir"
     module load gcc
     tar xvf "$scratchdir/lua-5.4.6.tar.gz"
     cd lua-5.4.6/
-    sed -i 's/CFLAGS= -O2/CFLAGS= -Ofast/' src/Makefile
     make -j$(nproc)
     cp src/lua "$basedir"
 )
