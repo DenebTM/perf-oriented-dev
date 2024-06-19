@@ -43,6 +43,9 @@
 #endif
 #endif
 
+#if LUA_USE_JUMPTABLE
+#warning "jump table"
+#endif
 
 
 /* limit for table tag-method chains (to avoid infinite loops) */

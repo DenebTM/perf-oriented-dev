@@ -1,0 +1,52 @@
+flags,func,wall (mean)
+-O2,fibonacci_iter(30),10.873
+-O2,fibonacci_naive(30),12.5483
+-O2,fibonacci_tail(30),12.598
+-O2 -DLUA_USE_JUMPTABLE,fibonacci_iter(30),10.9105
+-O2 -DLUA_USE_JUMPTABLE,fibonacci_naive(30),12.6001
+-O2 -DLUA_USE_JUMPTABLE,fibonacci_tail(30),12.6484
+-O2 -fgcse-after-reload,fibonacci_iter(30),10.8895
+-O2 -fgcse-after-reload,fibonacci_naive(30),12.4727
+-O2 -fgcse-after-reload,fibonacci_tail(30),12.5953
+-O2 -fipa-cp-clone,fibonacci_iter(30),11.8045
+-O2 -fipa-cp-clone,fibonacci_naive(30),12.7452
+-O2 -fipa-cp-clone,fibonacci_tail(30),12.667
+-O2 -floop-interchange,fibonacci_iter(30),10.8793
+-O2 -floop-interchange,fibonacci_naive(30),12.6233
+-O2 -floop-interchange,fibonacci_tail(30),12.6311
+-O2 -floop-unroll-and-jam,fibonacci_iter(30),10.9287
+-O2 -floop-unroll-and-jam,fibonacci_naive(30),12.5433
+-O2 -floop-unroll-and-jam,fibonacci_tail(30),12.6269
+-O2 -fpeel-loops,fibonacci_iter(30),10.913
+-O2 -fpeel-loops,fibonacci_naive(30),12.7362
+-O2 -fpeel-loops,fibonacci_tail(30),12.7044
+-O2 -fpredictive-commoning,fibonacci_iter(30),10.9172
+-O2 -fpredictive-commoning,fibonacci_naive(30),12.8
+-O2 -fpredictive-commoning,fibonacci_tail(30),12.6682
+-O2 -fsplit-loops,fibonacci_iter(30),10.9295
+-O2 -fsplit-loops,fibonacci_naive(30),12.5579
+-O2 -fsplit-loops,fibonacci_tail(30),12.629
+-O2 -fsplit-paths,fibonacci_iter(30),10.8815
+-O2 -fsplit-paths,fibonacci_naive(30),12.5352
+-O2 -fsplit-paths,fibonacci_tail(30),12.4299
+-O2 -ftree-loop-distribution,fibonacci_iter(30),10.8866
+-O2 -ftree-loop-distribution,fibonacci_naive(30),12.6671
+-O2 -ftree-loop-distribution,fibonacci_tail(30),12.6238
+-O2 -ftree-partial-pre,fibonacci_iter(30),11.0007
+-O2 -ftree-partial-pre,fibonacci_naive(30),12.5881
+-O2 -ftree-partial-pre,fibonacci_tail(30),12.6484
+-O2 -funswitch-loops,fibonacci_iter(30),10.9438
+-O2 -funswitch-loops,fibonacci_naive(30),12.4966
+-O2 -funswitch-loops,fibonacci_tail(30),12.6035
+-O2 -fvect-cost-model=dynamic,fibonacci_iter(30),10.8855
+-O2 -fvect-cost-model=dynamic,fibonacci_naive(30),12.8466
+-O2 -fvect-cost-model=dynamic,fibonacci_tail(30),12.6756
+-O2 -fversion-loops-for-strides,fibonacci_iter(30),10.9269
+-O2 -fversion-loops-for-strides,fibonacci_naive(30),12.8006
+-O2 -fversion-loops-for-strides,fibonacci_tail(30),12.6523
+-O3,fibonacci_iter(30),12.2039
+-O3,fibonacci_naive(30),13.4102
+-O3,fibonacci_tail(30),12.5004
+-Ofast,fibonacci_iter(30),11.629
+-Ofast,fibonacci_naive(30),12.7103
+-Ofast,fibonacci_tail(30),12.0485
