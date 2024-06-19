@@ -336,9 +336,9 @@ The results were slightly faster for the `tail` variant, and slower for the
 | tail  | 12.1623     |
 | iter  | 11.5557     |
 
-The adapted Code looks like this:
+The adapted code looks like this:
 
-```
+```c
 CallInfo *luaD_precall (lua_State *L, StkId func, int nresults) {
  retry:
   switch (ttypetag(s2v(func))) {
@@ -439,7 +439,7 @@ all the allocations.
 
 ### Mimalloc Results
 
-Unfortunatly mimalloc couldn't really speed up the execution times for this
+Unfortunately mimalloc couldn't really speed up the execution times for this
 scenario.
 
 The baseline results were (mean of 10 runs):
