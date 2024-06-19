@@ -34,7 +34,7 @@ Benchmark results with default Lua interpreter compilation (-O2):
 | naive     | 12.5483     | 0.322         |
 | tail      | 12.5980     | 0.046         |
 | iter      | 10.8730     | 0.036         |
-| **total** | **36.0913**     |               |
+| **total** | **36.0913** |               |
 
 # B) Profiling
 
