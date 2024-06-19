@@ -499,7 +499,7 @@ void luaD_poscall (lua_State *L, CallInfo *ci, int nres) {
 #define next_ci(L)  (L->ci->next ? L->ci->next : luaE_extendCI(L))
 
 
-__attribute__((always_inline)) l_sinline CallInfo *prepCallInfo (lua_State *L, StkId func, int nret,
+l_sinline CallInfo *prepCallInfo (lua_State *L, StkId func, int nret,
                                                 int mask, StkId top) {
   CallInfo *ci = L->ci = next_ci(L);  /* new frame */
   ci->func.p = func;
@@ -601,7 +601,15 @@ CallInfo *luaD_precall (lua_State *L, StkId func, int nresults) {
       int nfixparams = p->numparams;
       int fsize = p->maxstacksize;  /* frame size */
       checkstackGCp(L, fsize, func);
-      L->ci = ci = prepCallInfo(L, func, nresults, 0, func + 1 + fsize);
+
+      ci = L->ci = next_ci(L);  /* new frame */
+      ci->func.p = func;
+      ci->nresults = nresults;
+      ci->callstatus = 0;
+      ci->top.p = func + 1 + fsize;
+
+      L->ci = ci;
+
       ci->u.l.savedpc = p->code;  /* starting point */
       for (; narg < nfixparams; narg++)
         setnilvalue(s2v(L->top.p++));  /* complete missing arguments */
